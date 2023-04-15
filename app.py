@@ -17,7 +17,7 @@ if file_upload is not None:
     data = Utils().read_file(file_upload)
     
     if st.sidebar.checkbox("Display Data", value=True):
-        st.subheader("Dataset")
+        st.subheader("Uploaded Dataset")
         st.dataframe(data)
     
     with st.sidebar.expander("ML General Settings"):
