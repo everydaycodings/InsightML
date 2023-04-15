@@ -5,7 +5,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import cross_val_score
 import numpy as np
 from sklearn import metrics
-
+from sklearn.linear_model import Ridge, ElasticNet, Lasso
 
 class Utils:
 
@@ -35,7 +35,20 @@ class Utils:
         
         return X_train, X_test, y_train, y_test
 
-        
+    
+    def empty_liner_dict(self):
+
+        metrics_dict = {
+            "MAE": "Not Selected",
+            "MSE": "Not Selected",
+            "R2": "Not Selected",
+            "Adjusted R2": "Not Selected",
+            "RMSE": "Not Selected",
+            "Cross Validated R2": "Not Selected"
+        }
+
+        return metrics_dict
+
 
 
 class ApplyLinearRegression:
@@ -108,4 +121,19 @@ class ApplyLinearRegression:
     
         return metrics
 
+    
+    def apply_liner_model(self, metrics_selector, linier_model, alpha, l1_ratio=None):
+
+        if linier_model == "Lasso Regression":
+            regression=Lasso(alpha=alpha)
+        elif linier_model == "Ridge Regression":
+            regression=Ridge(alpha=alpha)
+        elif linier_model == "ElasticNet Regression":
+            regression = ElasticNet(alpha=alpha, l1_ratio=l1_ratio)
         
+        regression.fit(self.X_train,self.y_train)
+        y_pred = regression.predict(self.X_test)
+
+        metrics = self.Reg_Models_Evaluation_Metrics(regression,self.X_train,self.y_train,self.X_test,self.y_test,y_pred, metrics_selector)
+
+        return metrics
