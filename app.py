@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-from helper import Utils, ApplyLinearRegression, ApplyLogisticRegression, ApplyDecisionTreeRegressor
+from helper import Utils, ApplyLinearRegression, ApplyLogisticRegression, ApplyDecisionTreeRegressor, ApplyDecisionTreeClassifier
 
 
-models_list = ["Linear Regression", "Logistic Regression", "Decision Tree"]
+models_list = ["Linear Regression", "Logistic Regression", "Decision Tree Regression", "Decision Tree Classifier"]
 linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "Cross Validated R2"]
 logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precision Recall Curve"]
 
@@ -61,7 +61,7 @@ if file_upload is not None:
         if model_selector == "Logistic Regression":
             penalty_selector = st.selectbox("Select the penalty: ", options=["l1", "l2", "elasticnet", None], index=1)
 
-        if model_selector == "Decision Tree":
+        if model_selector == "Decision Tree Regression":
 
             criterion = st.selectbox(
                 'Criterion',
@@ -90,19 +90,46 @@ if file_upload is not None:
                 max_leaf_nodes = None
 
 
+        if model_selector == "Decision Tree Classifier":
+
+            criterion = st.selectbox(
+                'Criterion',
+                ('gini', 'entropy')
+            )
+
+            splitter = st.selectbox(
+                'Splitter',
+                ('best', 'random')
+            )
+
+            max_depth = int(st.number_input('Max Depth', step=1))
+
+            min_samples_split = st.slider('Min Samples Split', 1, X_train.shape[0], 2)
+
+            min_samples_leaf = st.slider('Min Samples Leaf', 1, X_train.shape[0], 1)
+
+            max_features = st.slider('Max Features', 1, 2, len(X_train.columns))
+
+            max_leaf_nodes = int(st.number_input('Max Leaf Nodes', step=1))
+
+            min_impurity_decrease = st.number_input('Min Impurity Decrease')
+
+            if max_depth == 0:
+                max_depth = None
+
+            if max_leaf_nodes == 0:
+                max_leaf_nodes = None
     
-    
-    
+
+
     with st.sidebar.expander("Choose Metrics To show"):
 
-        if model_selector == "Linear Regression" or model_selector == "Decision Tree":
+        if model_selector == "Linear Regression" or model_selector == "Decision Tree Regression":
             metrics_selector = st.multiselect("Select the metrics to be ploted: ", options=linear_regression_model_metrics, default=linear_regression_model_metrics)
 
         elif model_selector == "Logistic Regression":
             metrics_selector = st.multiselect("Select the metrics to be ploted: ", options=logistic_regression_model_metrics, default=logistic_regression_model_metrics)
 
-    
-    
     
     
     
@@ -157,12 +184,20 @@ if file_upload is not None:
             st.title("Plot Metrics")
             ApplyLogisticRegression(X_train, X_test, y_train, y_test).plot_metrics(y_pred,regression_, metrics_selector)
         
-        elif model_selector == "Decision Tree":
+        elif model_selector == "Decision Tree Regression":
 
             st.title("{} Result: ".format(model_selector))
             
             linear_metrics_dict = ApplyDecisionTreeRegressor(X_train, X_test, y_train, y_test).apply_model(criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, metrics_selector)
             
             for key, value in linear_metrics_dict.items():
+                    if value != None:
+                        st.write(key, ":", value)
+        
+        
+        elif model_selector == "Decision Tree Classifier":
+            st.title("{} Result: ".format(model_selector))
+            metrics_dict = ApplyDecisionTreeClassifier(X_train, X_test, y_train, y_test).apply_model(criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, min_impurity_decrease)
+            for key, value in metrics_dict.items():
                     if value != None:
                         st.write(key, ":", value)

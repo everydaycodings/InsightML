@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_sc
 import matplotlib.pyplot as plt
 import seaborn as sns
 import tempfile
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.tree import DecisionTreeRegressor,DecisionTreeClassifier
 from sklearn.metrics import r2_score
 from sklearn.tree import export_graphviz
 
@@ -283,21 +283,40 @@ class ApplyDecisionTreeRegressor:
         y_pred = reg.predict(self.X_test)
 
         metrics = self.Reg_Models_Evaluation_Metrics(reg, y_pred, metrics_selector)
-
-        #col1, col2 = st.columns(2)
-
-        #with col1:
-        #    tree = export_graphviz(reg,filled=True)
-        #    st.graphviz_chart(tree)
-
-        #with col2:
-        #    fig, ax = plt.subplots()
-        #    st.text("{} {}".format(len(self.X_train), len(self.y_train)))
-        #    # Plot initial graph#
-        #    ax.scatter(self.X_train, self.y_train, color="yellow", edgecolor="black")
-        #    ax.plot(self.X_test, y_pred, linewidth=1, color='blue')
-        #    ax.legend()
-        #    fig.savefig("fsdfs.png")
-        
         
         return metrics
+
+
+
+
+class ApplyDecisionTreeClassifier:
+
+    def __init__(self, X_train, X_test, y_train, y_test):
+
+        self.X_train = X_train
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_test = y_test
+    
+
+    def apply_model(self, criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, min_impurity_decrease):
+
+        clf = DecisionTreeClassifier(criterion=criterion,splitter=splitter,max_depth=max_depth,random_state=42,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_features=max_features,max_leaf_nodes=max_leaf_nodes,min_impurity_decrease=min_impurity_decrease)
+        clf.fit(self.X_train, self.y_train)
+        y_pred = clf.predict(self.X_test)
+
+        accuracy = round(accuracy_score(self.y_test, y_pred), 3)
+        recall = round(recall_score(self.y_test, y_pred), 3)
+        precision = round(precision_score(self.y_test, y_pred), 3)
+        f1 = round(f1_score(self.y_test, y_pred), 3)
+        auc = round(roc_auc_score(self.y_test, y_pred), 3)
+
+        metrics_dict = {
+            "Accuracy": accuracy,
+            "Recall": recall,
+            "Precision": precision,
+            "F1 Score": f1,
+            "AUC Score": auc
+        }
+
+        return metrics_dict
