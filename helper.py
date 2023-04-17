@@ -10,6 +10,9 @@ from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_sc
 import matplotlib.pyplot as plt
 import seaborn as sns
 import tempfile
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import r2_score
+from sklearn.tree import export_graphviz
 
 
 class Utils:
@@ -209,3 +212,92 @@ class ApplyLogisticRegression:
         auc = round(roc_auc_score(self.y_test, y_pred), 3)
 
         return accuracy, recall, precision, f1, auc, y_pred, regression
+
+
+
+class ApplyDecisionTreeRegressor:
+
+    def __init__(self, X_train, X_test, y_train, y_test):
+
+        self.X_train = X_train
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_test = y_test
+
+
+    def Reg_Models_Evaluation_Metrics (self, model,y_pred, metrics_selector):
+
+        cv_score = cross_val_score(estimator = model, X = self.X_train, y = self.y_train, cv = 10)
+        
+        if "MAE" in metrics_selector:
+            mae = round(metrics.mean_absolute_error(self.y_test, y_pred), 2)
+        else:
+            mae = None
+        
+        if "MSE" in metrics_selector:
+            mse = round(metrics.mean_squared_error(self.y_test, y_pred), 2)
+        else:
+            mse = None
+        
+        if "R2" in metrics_selector:
+            # Calculating Adjusted R-squared
+            r2 = round(model.score(self.X_test, self.y_test), 2)
+        else:
+            r2 = None
+        
+        if "Adjusted R2" in metrics_selector:
+            r2_ = model.score(self.X_test, self.y_test)
+            n = self.X_test.shape[0]
+            p = self.X_test.shape[1]
+            adjusted_r2 = round(1-(1-r2_)*(n-1)/(n-p-1), 2)
+        else:
+            adjusted_r2 = None
+        
+        if "RMSE" in metrics_selector:
+            RMSE = round(np.sqrt(mse), 2)
+        else:
+            RMSE = None
+        
+        if "Cross Validated R2" in metrics_selector:
+            CV_R2 = round(cv_score.mean(), 2)
+        else:
+            CV_R2 = None
+        
+
+        metrics_dict = {
+            "MAE": mae,
+            "MSE": mse,
+            "R2": r2,
+            "Adjusted R2": adjusted_r2,
+            "RMSE": RMSE,
+            "Cross Validated R2": CV_R2
+        }
+
+        return metrics_dict
+    
+    def apply_model(self, criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, metrics_selector):
+        
+        reg = DecisionTreeRegressor(criterion=criterion,splitter=splitter,max_depth=max_depth,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_leaf_nodes=max_leaf_nodes,min_impurity_decrease=min_impurity_decrease)
+        reg.fit(self.X_train, self.y_train)
+
+        y_pred = reg.predict(self.X_test)
+
+        metrics = self.Reg_Models_Evaluation_Metrics(reg, y_pred, metrics_selector)
+
+        #col1, col2 = st.columns(2)
+
+        #with col1:
+        #    tree = export_graphviz(reg,filled=True)
+        #    st.graphviz_chart(tree)
+
+        #with col2:
+        #    fig, ax = plt.subplots()
+        #    st.text("{} {}".format(len(self.X_train), len(self.y_train)))
+        #    # Plot initial graph#
+        #    ax.scatter(self.X_train, self.y_train, color="yellow", edgecolor="black")
+        #    ax.plot(self.X_test, y_pred, linewidth=1, color='blue')
+        #    ax.legend()
+        #    fig.savefig("fsdfs.png")
+        
+        
+        return metrics

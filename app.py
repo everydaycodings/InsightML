@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-from helper import Utils, ApplyLinearRegression, ApplyLogisticRegression
+from helper import Utils, ApplyLinearRegression, ApplyLogisticRegression, ApplyDecisionTreeRegressor
 
 
-models_list = ["Linear Regression", "Logistic Regression"]
+models_list = ["Linear Regression", "Logistic Regression", "Decision Tree"]
 linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "Cross Validated R2"]
 logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precision Recall Curve"]
 
@@ -21,6 +21,8 @@ if file_upload is not None:
         st.title("Uploaded Dataset")
         st.dataframe(data)
     
+    
+    
     with st.sidebar.expander("ML General Settings"):
         
         drop_columns_selector = st.multiselect("Select Columns Which you want to drop(Optional): ", options=data.columns)
@@ -36,6 +38,8 @@ if file_upload is not None:
         X_train, X_test, y_train, y_test = Utils().train_test_split(x, y, float(test_size_value))
     
     
+    
+    
     with st.sidebar.expander("Select your Ml Model"):
 
         model_selector = st.selectbox("Select Your Model: ", options=models_list)
@@ -44,6 +48,9 @@ if file_upload is not None:
             linear_model_selector = st.multiselect("Select Your Linear Model(Optional): ", options=[None, "Ridge Regression", "Lasso Regression", "ElasticNet Regression"])
     
 
+    
+    
+    
     with st.sidebar.expander("Hyperparameters"):
 
         if model_selector == "Linear Regression":
@@ -54,15 +61,51 @@ if file_upload is not None:
         if model_selector == "Logistic Regression":
             penalty_selector = st.selectbox("Select the penalty: ", options=["l1", "l2", "elasticnet", None], index=1)
 
+        if model_selector == "Decision Tree":
 
+            criterion = st.selectbox(
+                'Criterion',
+                ('squared_error', 'friedman_mse', 'absolute_error', 'poisson')
+            )
+
+            splitter = st.selectbox(
+                'Splitter',
+                ('best', 'random')
+            )
+
+            max_depth = int(st.number_input('Max Depth'))
+
+            min_samples_split = st.slider('Min Samples Split', 1, X_train.shape[0], 2,key=1234)
+
+            min_samples_leaf = st.slider('Min Samples Leaf', 1, X_train.shape[0], 1,key=1235)
+
+            max_leaf_nodes = int(st.number_input('Max Leaf Nodes'))
+
+            min_impurity_decrease = st.number_input('Min Impurity Decrease')
+
+            if max_depth == 0:
+                max_depth = None
+
+            if max_leaf_nodes == 0:
+                max_leaf_nodes = None
+
+
+    
+    
+    
     with st.sidebar.expander("Choose Metrics To show"):
 
-        if model_selector == "Linear Regression":
+        if model_selector == "Linear Regression" or model_selector == "Decision Tree":
             metrics_selector = st.multiselect("Select the metrics to be ploted: ", options=linear_regression_model_metrics, default=linear_regression_model_metrics)
 
         elif model_selector == "Logistic Regression":
             metrics_selector = st.multiselect("Select the metrics to be ploted: ", options=logistic_regression_model_metrics, default=logistic_regression_model_metrics)
 
+    
+    
+    
+    
+    
     if st.sidebar.button("Evaluate"):
 
         if model_selector == "Linear Regression":
@@ -98,7 +141,7 @@ if file_upload is not None:
             else:
                 for key, value in linear_metrics_dict.items():
                     if value != None:
-                        st.text("{}: {}".format(key, value))
+                        st.write(key, ":", value)
         
 
         elif model_selector == "Logistic Regression":
@@ -113,3 +156,13 @@ if file_upload is not None:
             
             st.title("Plot Metrics")
             ApplyLogisticRegression(X_train, X_test, y_train, y_test).plot_metrics(y_pred,regression_, metrics_selector)
+        
+        elif model_selector == "Decision Tree":
+
+            st.title("{} Result: ".format(model_selector))
+            
+            linear_metrics_dict = ApplyDecisionTreeRegressor(X_train, X_test, y_train, y_test).apply_model(criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, metrics_selector)
+            
+            for key, value in linear_metrics_dict.items():
+                    if value != None:
+                        st.write(key, ":", value)
