@@ -45,16 +45,20 @@ if file_upload is not None:
         model_selector = st.selectbox("Select Your Model: ", options=models_list)
 
         if model_selector == "Linear Regression":
-            linear_model_selector = st.multiselect("Select Your Linear Model(Optional): ", options=[None, "Ridge Regression", "Lasso Regression", "ElasticNet Regression"])
+            multi_model_selector = st.multiselect("Select Your Linear Model(Optional): ", options=[None, "Ridge Regression", "Lasso Regression", "ElasticNet Regression"])
     
-
+        if model_selector == "Decision Tree Regression":
+            multi_model_selector = st.multiselect("Select Your Decision Tree Model(OPtional): ", options=[None, "Random Forest"])
+        
+        if model_selector == "Decision Tree Classifier":
+            multi_model_selector = st.multiselect("Select Your Decision Tree Model(OPtional): ", options=[None, "Random Forest"])
     
     
     
     with st.sidebar.expander("Hyperparameters"):
 
         if model_selector == "Linear Regression":
-            if None not in linear_model_selector:
+            if None not in multi_model_selector:
                     apha_value_selector = st.number_input("Enter Your Alpha Value: ", min_value=0.0, value=1.0)
                     l1_ratio_selector = st.number_input("L1 ratio for ElasticNet(optional): ", min_value=0.1, max_value=1.0, value=0.5)
 
@@ -63,6 +67,10 @@ if file_upload is not None:
 
         if model_selector == "Decision Tree Regression":
 
+            if None not in multi_model_selector:
+                n_estimators = st.number_input("The number of trees in the forest: ", min_value=1, value=100, step=1)
+                bootstrap = st.selectbox("Choose Weather To Bootstrap: ", options=[True, False], index=0)
+            
             criterion = st.selectbox(
                 'Criterion',
                 ('squared_error', 'friedman_mse', 'absolute_error', 'poisson')
@@ -79,7 +87,7 @@ if file_upload is not None:
 
             min_samples_leaf = st.slider('Min Samples Leaf', 1, X_train.shape[0], 1,key=1235)
 
-            max_leaf_nodes = int(st.number_input('Max Leaf Nodes'))
+            max_leaf_nodes = int(st.number_input(label='Max Leaf Nodes', min_value=0, value=0, step=1))
 
             min_impurity_decrease = st.number_input('Min Impurity Decrease')
 
@@ -91,6 +99,10 @@ if file_upload is not None:
 
 
         if model_selector == "Decision Tree Classifier":
+            
+            if None not in multi_model_selector:
+                n_estimators = st.number_input("The number of trees in the forest: ", min_value=1, value=100, step=1)
+                bootstrap = st.selectbox("Choose Weather To Bootstrap: ", options=[True, False], index=0)
 
             criterion = st.selectbox(
                 'Criterion',
@@ -110,7 +122,7 @@ if file_upload is not None:
 
             max_features = st.slider('Max Features', 1, 2, len(X_train.columns))
 
-            max_leaf_nodes = int(st.number_input('Max Leaf Nodes', step=1))
+            max_leaf_nodes = int(st.number_input(label='Max Leaf Nodes', min_value=0, value=0, step=1))
 
             min_impurity_decrease = st.number_input('Min Impurity Decrease')
 
@@ -122,7 +134,7 @@ if file_upload is not None:
     
 
 
-    with st.sidebar.expander("Choose Metrics To show"):
+    with st.sidebar.expander("Choose Metrics To Plot"):
 
         if model_selector == "Linear Regression" or model_selector == "Decision Tree Regression":
             metrics_selector = st.multiselect("Select the metrics to be ploted: ", options=linear_regression_model_metrics, default=linear_regression_model_metrics)
@@ -140,17 +152,17 @@ if file_upload is not None:
             linear_metrics_dict = ApplyLinearRegression(X_train, X_test, y_train, y_test).apply_model(metrics_selector)
             st.title("{} Result: ".format(model_selector))
             
-            if None not in linear_model_selector:
+            if None not in multi_model_selector:
 
-                if "Ridge Regression" in linear_model_selector:
+                if "Ridge Regression" in multi_model_selector:
                     ridge_metrics_dict = ApplyLinearRegression(X_train, X_test, y_train, y_test).apply_liner_model(metrics_selector, "Ridge Regression", apha_value_selector)
                 else:
                     ridge_metrics_dict = Utils().empty_liner_dict()
-                if "Lasso Regression" in linear_model_selector:
+                if "Lasso Regression" in multi_model_selector:
                     lasso_metrics_dict = ApplyLinearRegression(X_train, X_test, y_train, y_test).apply_liner_model(metrics_selector, "Lasso Regression", apha_value_selector)
                 else:
                     lasso_metrics_dict = Utils().empty_liner_dict()
-                if "ElasticNet Regression" in linear_model_selector:
+                if "ElasticNet Regression" in multi_model_selector:
                     elatic_metrics_dict = ApplyLinearRegression(X_train, X_test, y_train, y_test).apply_liner_model(metrics_selector, "Lasso Regression", apha_value_selector, l1_ratio=l1_ratio_selector)
                 else:
                     elatic_metrics_dict = Utils().empty_liner_dict()
@@ -188,16 +200,51 @@ if file_upload is not None:
 
             st.title("{} Result: ".format(model_selector))
             
-            linear_metrics_dict = ApplyDecisionTreeRegressor(X_train, X_test, y_train, y_test).apply_model(criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, metrics_selector)
+            decision_tree_metrics_dict = ApplyDecisionTreeRegressor(X_train, X_test, y_train, y_test).apply_model(criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, metrics_selector)
             
-            for key, value in linear_metrics_dict.items():
-                    if value != None:
-                        st.write(key, ":", value)
+            if None not in multi_model_selector:
+                
+                if "Random Forest" in multi_model_selector:
+                    random_forest_metrics_dict = ApplyDecisionTreeRegressor(X_train, X_test, y_train, y_test).apply_decision_tree_models("Random Forest", n_estimators, criterion, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, metrics_selector, bootstrap)
+                else:
+                    random_forest_metrics_dict = Utils().empty_liner_dict()
+                
+                algo_name = ["Decision Tree", "Random Forest"]
+                metrics_dict = {
+                    algo_name[0]: decision_tree_metrics_dict,
+                    algo_name[1]: random_forest_metrics_dict,
+                }
+                df = pd.DataFrame.from_dict(metrics_dict, orient="index")
+                st.dataframe(df)
+
+            else:
+                for key, value in decision_tree_metrics_dict.items():
+                        if value != None:
+                            st.write(key, ":", value)
         
         
         elif model_selector == "Decision Tree Classifier":
+
             st.title("{} Result: ".format(model_selector))
-            metrics_dict = ApplyDecisionTreeClassifier(X_train, X_test, y_train, y_test).apply_model(criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, min_impurity_decrease)
-            for key, value in metrics_dict.items():
-                    if value != None:
-                        st.write(key, ":", value)
+        
+            decision_tree_metrics_dict = ApplyDecisionTreeClassifier(X_train, X_test, y_train, y_test).apply_model(criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, min_impurity_decrease)
+        
+            if None not in multi_model_selector:
+                
+                if "Random Forest" in multi_model_selector:
+                    random_forest_metrics_dict = ApplyDecisionTreeClassifier(X_train, X_test, y_train, y_test).apply_decision_tree_models("Random Forest", n_estimators, criterion, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, min_impurity_decrease, bootstrap)
+                else:
+                    random_forest_metrics_dict = Utils().empty_liner_dict()
+                
+                algo_name = ["Decision Tree", "Random Forest"]
+                metrics_dict = {
+                    algo_name[0]: decision_tree_metrics_dict,
+                    algo_name[1]: random_forest_metrics_dict,
+                }
+                df = pd.DataFrame.from_dict(metrics_dict, orient="index")
+                st.dataframe(df)
+
+            else:
+                for key, value in decision_tree_metrics_dict.items():
+                        if value != None:
+                            st.write(key, ":", value)

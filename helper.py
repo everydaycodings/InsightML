@@ -13,7 +13,7 @@ import tempfile
 from sklearn.tree import DecisionTreeRegressor,DecisionTreeClassifier
 from sklearn.metrics import r2_score
 from sklearn.tree import export_graphviz
-
+from sklearn.ensemble  import RandomForestRegressor, RandomForestClassifier
 
 class Utils:
 
@@ -287,7 +287,18 @@ class ApplyDecisionTreeRegressor:
         return metrics
 
 
+    def apply_decision_tree_models(self, model_names, n_estimators, criterion, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, metrics_selector, bootstrap):
 
+        if model_names == "Random Forest":
+            reg = RandomForestRegressor(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, bootstrap=bootstrap)
+
+        reg.fit(self.X_train, self.y_train)
+
+        y_pred = reg.predict(self.X_test)
+
+        metrics = self.Reg_Models_Evaluation_Metrics(reg, y_pred, metrics_selector)
+        
+        return metrics
 
 class ApplyDecisionTreeClassifier:
 
@@ -299,11 +310,7 @@ class ApplyDecisionTreeClassifier:
         self.y_test = y_test
     
 
-    def apply_model(self, criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, min_impurity_decrease):
-
-        clf = DecisionTreeClassifier(criterion=criterion,splitter=splitter,max_depth=max_depth,random_state=42,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_features=max_features,max_leaf_nodes=max_leaf_nodes,min_impurity_decrease=min_impurity_decrease)
-        clf.fit(self.X_train, self.y_train)
-        y_pred = clf.predict(self.X_test)
+    def evaluation_metrics(self, y_pred):
 
         accuracy = round(accuracy_score(self.y_test, y_pred), 3)
         recall = round(recall_score(self.y_test, y_pred), 3)
@@ -318,5 +325,28 @@ class ApplyDecisionTreeClassifier:
             "F1 Score": f1,
             "AUC Score": auc
         }
+
+        return metrics_dict
+    
+
+    def apply_model(self, criterion, splitter, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, min_impurity_decrease):
+
+        clf = DecisionTreeClassifier(criterion=criterion,splitter=splitter,max_depth=max_depth,random_state=42,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_features=max_features,max_leaf_nodes=max_leaf_nodes,min_impurity_decrease=min_impurity_decrease)
+        clf.fit(self.X_train, self.y_train)
+        y_pred = clf.predict(self.X_test)
+
+        metrics_dict = self.evaluation_metrics(y_pred)
+
+        return metrics_dict
+    
+    def apply_decision_tree_models(self, model_names, n_estimators, criterion,  max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, min_impurity_decrease, bootstrap):
+
+        if "Random Forest" in model_names:
+            clf = RandomForestClassifier(n_estimators=n_estimators,criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, bootstrap=bootstrap)
+        
+        clf.fit(self.X_train, self.y_train)
+        y_pred = clf.predict(self.X_test)
+
+        metrics_dict = self.evaluation_metrics(y_pred)
 
         return metrics_dict
