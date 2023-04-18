@@ -41,7 +41,7 @@ if file_upload is not None:
 
         model_type = st.selectbox("Select Your Work Type: ", options=["Multi-Model Inspection", "Single-Model Inspection"], index=0)
 
-        if model_type == "Multi-Model Compare":
+        if model_type == "Multi-Model Inspection":
 
             problem_selector = st.selectbox("Select Your Problem Type: ", options=problem_selector_options, index=0)
 
