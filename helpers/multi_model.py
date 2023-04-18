@@ -8,7 +8,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
-
+from sklearn.svm import SVR
 
 class RegressionHandler:
 
@@ -78,6 +78,19 @@ class RegressionHandler:
         return metrics
 
     
+    def apply_svr(self, kernal, degree, gamma):
+
+        reg = SVR(kernel=kernal, gamma=gamma, degree=degree)
+        reg.fit(self.X_train, self.y_train)
+
+        y_pred = reg.predict(self.X_test)
+
+        metrics = self.Evaluation_Metrics(reg, y_pred)
+        
+        return metrics
+
+
+
     def apply_model(self, metrics_dict):
 
         df = pd.DataFrame.from_dict(metrics_dict, orient="index")

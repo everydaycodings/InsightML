@@ -8,7 +8,7 @@ linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "C
 logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precision Recall Curve"]
 problem_selector_options = ["Regression Problem", "Classifier Problem"]
 
-regression_singl_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest"]
+regression_singl_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression"]
 st.sidebar.title("Welcome to InsightML")
 
 with st.sidebar.expander("Upload Dataset"):
@@ -272,37 +272,44 @@ if file_upload is not None:
             with st.sidebar.expander("Hyperparameters"):
 
                 if "Ridge Regression" in regression_model_selected or "Lasso Regression" in regression_model_selected or "ElasticNet Regression" in regression_model_selected:
-                    apha_value_selector = st.number_input("Enter Your Alpha Value: ", min_value=0.0, value=1.0)
+                    apha_value_selector = st.number_input("Enter Your Alpha Value (lasso, ridge, elastic): ", min_value=0.0, value=1.0)
                 
                 if "ElasticNet Regression" in regression_model_selected:
                     l1_ratio_selector = st.number_input("L1 ratio for ElasticNet(optional): ", min_value=0.1, max_value=1.0, value=0.5)                
                 
                 if "Random Forest" in regression_model_selected:
-                    n_estimators = st.number_input("The number of trees in the forest: ", min_value=1, value=100, step=1)
-                    bootstrap = st.selectbox("Choose Weather To Bootstrap: ", options=[True, False], index=0)
+                    n_estimators = st.number_input("The number of trees in the Random forest: ", min_value=1, value=100, step=1)
+                    bootstrap = st.selectbox("Choose Weather To Bootstrap (Random Forest): ", options=[True, False], index=0)
                 
-                criterion = st.selectbox(
-                    'Criterion',
-                    ('squared_error', 'friedman_mse', 'absolute_error', 'poisson')
-                )
+                if "Support Vector Regression" in regression_model_selected:
+                        svr_kernal = st.selectbox("Select the kernal for SVR: ", options=["linear", "poly", "rbf", "sigmoid", "precomputed"], index=2)
+                        svr_degree = st.number_input("Input The Degree for SVR: ", min_value=0, step=1, value=3)
+                        svr_gama = st.selectbox("Select the Gama for SVR: ", options=["scale", "auto"], index=0)
 
-                splitter = st.selectbox('Splitter',['best', 'random'], index=0)
+                if "Random Forest" in regression_model_selected or "Decision Tree" in regression_model_selected:
+                    criterion = st.selectbox(
+                        'Criterion',
+                        ('squared_error', 'friedman_mse', 'absolute_error', 'poisson')
+                    )
 
-                max_depth = int(st.number_input('Max Depth'))
 
-                min_samples_split = st.slider('Min Samples Split', 1, X_train.shape[0], 2,key=1234)
+                    splitter = st.selectbox('Splitter',['best', 'random'], index=0)
 
-                min_samples_leaf = st.slider('Min Samples Leaf', 1, X_train.shape[0], 1,key=1235)
+                    max_depth = int(st.number_input('Max Depth'))
 
-                max_leaf_nodes = int(st.number_input(label='Max Leaf Nodes', min_value=0, value=0, step=1))
+                    min_samples_split = st.slider('Min Samples Split', 1, X_train.shape[0], 2,key=1234)
 
-                min_impurity_decrease = st.number_input('Min Impurity Decrease')
+                    min_samples_leaf = st.slider('Min Samples Leaf', 1, X_train.shape[0], 1,key=1235)
 
-                if max_depth == 0:
-                    max_depth = None
+                    max_leaf_nodes = int(st.number_input(label='Max Leaf Nodes', min_value=0, value=0, step=1))
 
-                if max_leaf_nodes == 0:
-                    max_leaf_nodes = None
+                    min_impurity_decrease = st.number_input('Min Impurity Decrease')
+
+                    if max_depth == 0:
+                        max_depth = None
+
+                    if max_leaf_nodes == 0:
+                        max_leaf_nodes = None
 
                 
             if st.sidebar.button("Evaluate"):
@@ -331,6 +338,10 @@ if file_upload is not None:
                         random_forest_regression_result = regression_model.apply_decision_tree(model_name="Random Forest",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap)
                         metrics_dict[algo] = random_forest_regression_result
 
+                    if algo == "Support Vector Regression":
+                        svr_regression_result = regression_model.apply_svr(kernal=svr_kernal, degree=svr_degree, gamma=svr_gama)
+                        metrics_dict[algo] = svr_regression_result
+                
                 metrics_dataframe = regression_model.apply_model(metrics_dict)
                 
 
