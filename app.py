@@ -48,8 +48,6 @@ if file_upload is not None:
 
     if model_type == "Single-Model Inspection":
     
-    
-    
         with st.sidebar.expander("Select your Ml Model"):
 
             model_selector = st.selectbox("Select Your Model: ", options=models_list)
