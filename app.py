@@ -39,14 +39,14 @@ if file_upload is not None:
         st.text("Your Test Size is: {}".format(test_size_value))
         X_train, X_test, y_train, y_test = Utils().train_test_split(x, y, float(test_size_value))
 
-        model_type = st.selectbox("Select Your Work Type: ", options=["Multi-Model Compare", "Single-Model Stats"], index=0)
+        model_type = st.selectbox("Select Your Work Type: ", options=["Multi-Model Inspection", "Single-Model Inspection"], index=0)
 
         if model_type == "Multi-Model Compare":
 
             problem_selector = st.selectbox("Select Your Problem Type: ", options=problem_selector_options, index=0)
 
 
-    if model_type == "Single-Model Stats":
+    if model_type == "Single-Model Inspection":
     
     
     
@@ -260,7 +260,7 @@ if file_upload is not None:
                                 st.write(key, ":", value)
         
 
-    if model_type == "Multi-Model Compare":
+    if model_type == "Multi-Model Inspection":
         
         if problem_selector == "Regression Problem":
 
