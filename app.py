@@ -267,14 +267,19 @@ if file_upload is not None:
             with st.sidebar.expander("Selet Your Models"):
 
                 regression_model_selected =st.multiselect("Select Your Regression Models: ", options=regression_singl_model_problem, default=regression_singl_model_problem)
+            
 
             with st.sidebar.expander("Hyperparameters"):
 
-                apha_value_selector = st.number_input("Enter Your Alpha Value: ", min_value=0.0, value=1.0)
-                l1_ratio_selector = st.number_input("L1 ratio for ElasticNet(optional): ", min_value=0.1, max_value=1.0, value=0.5)                
+                if "Ridge Regression" in regression_model_selected or "Lasso Regression" in regression_model_selected or "ElasticNet Regression" in regression_model_selected:
+                    apha_value_selector = st.number_input("Enter Your Alpha Value: ", min_value=0.0, value=1.0)
                 
-                n_estimators = st.number_input("The number of trees in the forest: ", min_value=1, value=100, step=1)
-                bootstrap = st.selectbox("Choose Weather To Bootstrap: ", options=[True, False], index=0)
+                if "ElasticNet Regression" in regression_model_selected:
+                    l1_ratio_selector = st.number_input("L1 ratio for ElasticNet(optional): ", min_value=0.1, max_value=1.0, value=0.5)                
+                
+                if "Random Forest" in regression_model_selected:
+                    n_estimators = st.number_input("The number of trees in the forest: ", min_value=1, value=100, step=1)
+                    bootstrap = st.selectbox("Choose Weather To Bootstrap: ", options=[True, False], index=0)
                 
                 criterion = st.selectbox(
                     'Criterion',
@@ -303,27 +308,27 @@ if file_upload is not None:
             if st.sidebar.button("Evaluate"):
 
                 regression_model = RegressionHandler(X_train, X_test, y_train, y_test)
-                linear_regression_result = regression_model.apply_linear_regression(model_name="Linear Regression", alpha=apha_value_selector, l1_ratio=l1_ratio_selector)
-                lasso_regression_result = regression_model.apply_linear_regression(model_name="Lasso Regression", alpha=apha_value_selector, l1_ratio=l1_ratio_selector)
-                ridge_regression_result = regression_model.apply_linear_regression(model_name="Ridge Regression", alpha=apha_value_selector, l1_ratio=l1_ratio_selector)
-                elastic_regression_result = regression_model.apply_linear_regression(model_name="ElasticNet Regression", alpha=apha_value_selector, l1_ratio=l1_ratio_selector)
-
-                decision_tree_regression_result = regression_model.apply_decision_tree(model_name="Decision Tree",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter)
-                random_forest_regression_result = regression_model.apply_decision_tree(model_name="Random Forest",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap)
 
                 metrics_dict = {}
+
                 for algo in regression_model_selected:
                     if algo == "Linear Regression":
+                        linear_regression_result = regression_model.apply_linear_regression(model_name="Linear Regression")
                         metrics_dict[algo] = linear_regression_result
                     if algo == "Lasso Regression":
+                        lasso_regression_result = regression_model.apply_linear_regression(model_name="Lasso Regression", alpha=apha_value_selector)
                         metrics_dict[algo] = lasso_regression_result
                     if algo == "Ridge Regression":
+                        ridge_regression_result = regression_model.apply_linear_regression(model_name="Ridge Regression", alpha=apha_value_selector)
                         metrics_dict[algo] = ridge_regression_result
                     if algo == "ElasticNet Regression":
+                        elastic_regression_result = regression_model.apply_linear_regression(model_name="ElasticNet Regression", alpha=apha_value_selector, l1_ratio=l1_ratio_selector)
                         metrics_dict[algo] = elastic_regression_result
                     if algo == "Decision Tree":
+                        decision_tree_regression_result = regression_model.apply_decision_tree(model_name="Decision Tree",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter)
                         metrics_dict[algo] = decision_tree_regression_result
                     if algo == "Random Forest":
+                        random_forest_regression_result = regression_model.apply_decision_tree(model_name="Random Forest",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap)
                         metrics_dict[algo] = random_forest_regression_result
 
                 metrics_dataframe = regression_model.apply_model(metrics_dict)
