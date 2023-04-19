@@ -8,7 +8,7 @@ linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "C
 logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precision Recall Curve"]
 problem_selector_options = ["Regression Problem", "Classifier Problem"]
 
-regression_singl_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression"]
+regression_singl_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression", "XGBoost"]
 st.sidebar.title("Welcome to InsightML")
 
 with st.sidebar.expander("Upload Dataset"):
@@ -275,7 +275,7 @@ if file_upload is not None:
                 if "ElasticNet Regression" in regression_model_selected:
                     l1_ratio_selector = st.number_input("L1 ratio for ElasticNet(optional): ", min_value=0.1, max_value=1.0, value=0.5)                
                 
-                if "Random Forest" in regression_model_selected:
+                if "Random Forest" in regression_model_selected or "XGBoost" in regression_model_selected:
                     n_estimators = st.number_input("The number of trees in the Random forest: ", min_value=1, value=100, step=1)
                     bootstrap = st.selectbox("Choose Weather To Bootstrap (Random Forest): ", options=[True, False], index=0)
                 
@@ -283,6 +283,11 @@ if file_upload is not None:
                         svr_kernal = st.selectbox("Select the kernal for SVR: ", options=["linear", "poly", "rbf", "sigmoid", "precomputed"], index=2)
                         svr_degree = st.number_input("Input The Degree for SVR: ", min_value=0, step=1, value=3)
                         svr_gama = st.selectbox("Select the Gama for SVR: ", options=["scale", "auto"], index=0)
+
+                
+                if "XGBoost" in regression_model_selected:
+                    eta = round(st.number_input("Choose Your Learning rate for XGBoost: ", min_value=0.0, max_value=1.0, value=0.3, step=0.001),3)
+                    st.text("Your Learning rate is : {}".format(eta))
 
                 if "Random Forest" in regression_model_selected or "Decision Tree" in regression_model_selected:
                     criterion = st.selectbox(
@@ -335,10 +340,14 @@ if file_upload is not None:
                     if algo == "Random Forest":
                         random_forest_regression_result = regression_model.apply_decision_tree(model_name="Random Forest",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap)
                         metrics_dict[algo] = random_forest_regression_result
-
                     if algo == "Support Vector Regression":
                         svr_regression_result = regression_model.apply_svr(kernal=svr_kernal, degree=svr_degree, gamma=svr_gama)
                         metrics_dict[algo] = svr_regression_result
+                    
+                    if algo == "XGBoost":
+                        xgboost_regression_result = regression_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta)
+                        metrics_dict[algo] = xgboost_regression_result
+                    
                 
                 metrics_dataframe = regression_model.apply_model(metrics_dict)
                 

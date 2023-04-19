@@ -9,6 +9,7 @@ from sklearn import metrics
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.svm import SVR
+from xgboost import XGBRegressor
 
 class RegressionHandler:
 
@@ -62,12 +63,14 @@ class RegressionHandler:
     
         return metrics
 
-    def apply_decision_tree(self, model_name, criterion, max_depth, min_samples_split, min_samples_leaf, max_leaf_nodes, min_impurity_decrease, n_estimators=None, bootstrap=None, splitter=None):
+    def apply_decision_tree(self, model_name, criterion=None, max_depth=None, min_samples_split=None, min_samples_leaf=None, max_leaf_nodes=None, min_impurity_decrease=None, n_estimators=None, bootstrap=None, splitter=None, eta=None):
         
         if model_name == "Decision Tree":
             reg = DecisionTreeRegressor(criterion=criterion,splitter=splitter,max_depth=max_depth,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_leaf_nodes=max_leaf_nodes,min_impurity_decrease=min_impurity_decrease)
         elif model_name == "Random Forest":
             reg = RandomForestRegressor(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, bootstrap=bootstrap)
+        elif model_name == "XGBoost":
+            reg = XGBRegressor(n_estimators=n_estimators, max_depth=max_depth, eta=eta)
 
         reg.fit(self.X_train, self.y_train)
 
