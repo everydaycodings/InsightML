@@ -1,14 +1,18 @@
 import streamlit as st
 import pandas as pd
 from helpers.single_model import Utils, ApplyLinearRegression, ApplyLogisticRegression, ApplyDecisionTreeRegressor, ApplyDecisionTreeClassifier
-from helpers.multi_model import RegressionHandler
+from helpers.multi_model import RegressionHandler, ClassifierHandler
 
 models_list = ["Linear Regression", "Logistic Regression", "Decision Tree Regression", "Decision Tree Classifier"]
 linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "Cross Validated R2"]
 logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precision Recall Curve"]
 problem_selector_options = ["Regression Problem", "Classifier Problem"]
 
-regression_singl_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression", "XGBoost"]
+regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression", "XGBoost"]
+classifier_multi_model_problem = ["Lasso Regression", "Decision Tree", "Random Forest", "XGBoost"]
+
+
+
 st.sidebar.title("Welcome to InsightML")
 
 with st.sidebar.expander("Upload Dataset"):
@@ -34,16 +38,17 @@ if file_upload is not None:
         independent_column_selector = st.selectbox("Select your target(y) Column: ", options=data.columns)
         x, y = Utils().target_column(data, independent_column_selector)
 
-        test_size_selector = st.slider("Select your Test Size: ", min_value=1, max_value=100, value=42, step=1)
-        test_size_value = test_size_selector/100
-        st.text("Your Test Size is: {}".format(test_size_value))
-        X_train, X_test, y_train, y_test = Utils().train_test_split(x, y, float(test_size_value))
-
         model_type = st.selectbox("Select Your Work Type: ", options=["Multi-Model Inspection", "Single-Model Inspection"], index=0)
 
         if model_type == "Multi-Model Inspection":
 
             problem_selector = st.selectbox("Select Your Problem Type: ", options=problem_selector_options, index=0)
+
+        test_size_selector = st.slider("Select your Test Size: ", min_value=1, max_value=100, value=42, step=1)
+        test_size_value = test_size_selector/100
+        st.text("Your Test Size is: {}".format(test_size_value))
+        X_train, X_test, y_train, y_test = Utils().train_test_split(x, y, float(test_size_value))
+
 
 
     if model_type == "Single-Model Inspection":
@@ -264,7 +269,7 @@ if file_upload is not None:
 
             with st.sidebar.expander("Selet Your Models"):
 
-                regression_model_selected =st.multiselect("Select Your Regression Models: ", options=regression_singl_model_problem, default=regression_singl_model_problem)
+                regression_model_selected =st.multiselect("Select Your Regression Models: ", options=regression_multi_model_problem, default=regression_multi_model_problem)
             
 
             with st.sidebar.expander("Hyperparameters"):
@@ -353,4 +358,74 @@ if file_upload is not None:
                 
 
                 st.title("Regression Results: ")
+                st.dataframe(metrics_dataframe)
+        
+        
+        
+        if problem_selector == "Classifier Problem":
+            
+            with st.sidebar.expander("Selet Your Models"):
+
+                classification_model_selected =st.multiselect("Select Your Classification Models: ", options=classifier_multi_model_problem, default=classifier_multi_model_problem)
+                
+            with st.sidebar.expander("Hyperparameters"):
+
+                if "Lasso Regression" in classification_model_selected:
+                    penalty = st.selectbox("Select the penalty: ", options=["l1", "l2", "elasticnet", None], index=1)
+
+                if "Random Forest" in classification_model_selected or "XGBoost" in classification_model_selected:
+                    n_estimators = st.number_input("The number of trees in the Random forest: ", min_value=1, value=100, step=1)
+                    bootstrap = st.selectbox("Choose Weather To Bootstrap (Random Forest): ", options=[True, False], index=0)
+
+                if "XGBoost" in classification_model_selected or "Decision Tree" not in classification_model_selected or "XGBoost" not in classification_model_selected:
+                    eta = round(st.number_input("Choose Your Learning rate for XGBoost: ", min_value=0.0, max_value=1.0, value=0.3, step=0.001),3)
+                    st.text("Your Learning rate is : {}".format(eta))
+                    max_depth = int(st.number_input('Max Depth', key=111))
+                    if max_depth == 0:
+                        max_depth = None
+
+                if "Random Forest" in classification_model_selected or "Decision Tree" in classification_model_selected:
+                    criterion = st.selectbox(
+                        'Criterion',
+                        ["gini", "entropy", "log_loss"], index=0
+                    )
+
+
+                    splitter = st.selectbox('Splitter',['best', 'random'], index=0)
+                    max_depth = int(st.number_input('Max Depth'))
+                    max_features = st.slider('Max Features', 1, 2, len(X_train.columns))
+                    min_samples_split = st.slider('Min Samples Split', 1, X_train.shape[0], 2,key=1234)
+                    min_samples_leaf = st.slider('Min Samples Leaf', 1, X_train.shape[0], 1,key=1235)
+                    max_leaf_nodes = int(st.number_input(label='Max Leaf Nodes', min_value=0, value=0, step=1))
+                    min_impurity_decrease = st.number_input('Min Impurity Decrease')
+
+                    if max_depth == 0:
+                        max_depth = None
+
+                    if max_leaf_nodes == 0:
+                        max_leaf_nodes = None
+
+            if st.sidebar.button("Evaluate"):
+
+                classifier_model = ClassifierHandler(X_train, X_test, y_train, y_test)
+
+                metrics_dict = {}
+
+                for algo in classification_model_selected:
+
+                    if algo == "Lasso Regression":
+                        lasso_regression_result = classifier_model.apply_logistic(penalty)
+                        metrics_dict[algo] = lasso_regression_result
+                    elif algo == "Decision Tree":
+                        decision_tree_result = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter)
+                        metrics_dict[algo] = decision_tree_result
+                    elif algo == "Random Forest":
+                        random_forest_result = classifier_model.apply_decision_tree(model_name="Random Forest", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap)
+                        metrics_dict[algo] = random_forest_result
+                    elif algo == "XGBoost":
+                        xgboost_result = classifier_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta)
+                        metrics_dict[algo] =xgboost_result
+
+                metrics_dataframe = classifier_model.apply_model(metrics_dict)
+                st.title("Classification Results: ")
                 st.dataframe(metrics_dataframe)

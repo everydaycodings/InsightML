@@ -2,14 +2,16 @@ import numpy as np
 import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet, LogisticRegression
 from sklearn.model_selection import cross_val_score
 import numpy as np
 from sklearn import metrics
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.svm import SVR
-from xgboost import XGBRegressor
+from xgboost import XGBRegressor, XGBClassifier
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, ConfusionMatrixDisplay, confusion_matrix, RocCurveDisplay, PrecisionRecallDisplay, precision_recall_curve
+
 
 class RegressionHandler:
 
@@ -92,6 +94,72 @@ class RegressionHandler:
         
         return metrics
 
+
+
+    def apply_model(self, metrics_dict):
+
+        df = pd.DataFrame.from_dict(metrics_dict, orient="index")
+        return df
+
+
+
+
+
+class ClassifierHandler:
+
+    def __init__(self, X_train, X_test, y_train, y_test):
+
+        self.X_train = X_train
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_test = y_test
+
+    
+    def evaluation_metrics(self, y_pred):
+
+        accuracy = round(accuracy_score(self.y_test, y_pred), 3)
+        recall = round(recall_score(self.y_test, y_pred), 3)
+        precision = round(precision_score(self.y_test, y_pred), 3)
+        f1 = round(f1_score(self.y_test, y_pred), 3)
+        auc = round(roc_auc_score(self.y_test, y_pred), 3)
+
+        metrics_dict = {
+            "Accuracy": accuracy,
+            "Recall": recall,
+            "Precision": precision,
+            "F1 Score": f1,
+            "AUC Score": auc
+        }
+
+        return metrics_dict
+    
+    
+    def apply_logistic(self, penalty):
+
+        regression = LogisticRegression(penalty=penalty)
+        regression.fit(self.X_train,self.y_train)
+        y_pred = regression.predict(self.X_test)
+
+        metrics = self.evaluation_metrics(y_pred)
+
+        return metrics
+
+    def apply_decision_tree(self, model_name, criterion=None,  max_depth=None, min_samples_split=None, min_samples_leaf=None, max_features=None, max_leaf_nodes=None, min_impurity_decrease=None, splitter=None, n_estimators=None, bootstrap=None, eta=None):
+
+        if model_name == "Decision Tree":
+            clf = DecisionTreeClassifier(criterion=criterion,splitter=splitter,max_depth=max_depth,random_state=42,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_features=max_features,max_leaf_nodes=max_leaf_nodes,min_impurity_decrease=min_impurity_decrease)
+        if model_name == "Random Forest":
+            clf = RandomForestClassifier(n_estimators=n_estimators,criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, bootstrap=bootstrap)
+        if model_name == "XGBoost":
+            clf = XGBClassifier(n_estimators=n_estimators, max_depth=max_depth, eta=eta)
+        
+        clf.fit(self.X_train, self.y_train)
+        y_pred = clf.predict(self.X_test)
+
+        metrics = self.evaluation_metrics(y_pred)
+
+        return metrics
+    
 
 
     def apply_model(self, metrics_dict):
