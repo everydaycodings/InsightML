@@ -19,7 +19,7 @@ class RegressionHandler:
         self.X_test = X_test
         self.y_train = y_train
         self.y_test = y_test
-    
+     
     def Evaluation_Metrics(self, model, y_pred):
 
         cv_score = cross_val_score(estimator = model, X = self.X_train, y = self.y_train, cv = 10)
