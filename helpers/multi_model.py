@@ -8,7 +8,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
-from sklearn.svm import SVR
+from sklearn.svm import SVR, SVC
 from xgboost import XGBRegressor, XGBClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, ConfusionMatrixDisplay, confusion_matrix, RocCurveDisplay, PrecisionRecallDisplay, precision_recall_curve
 
@@ -115,13 +115,13 @@ class ClassifierHandler:
         self.y_test = y_test
 
     
-    def evaluation_metrics(self, y_pred):
+    def evaluation_metrics(self, y_pred, average, multi_class):
 
         accuracy = round(accuracy_score(self.y_test, y_pred), 3)
-        recall = round(recall_score(self.y_test, y_pred), 3)
-        precision = round(precision_score(self.y_test, y_pred), 3)
-        f1 = round(f1_score(self.y_test, y_pred), 3)
-        auc = round(roc_auc_score(self.y_test, y_pred), 3)
+        recall = round(recall_score(self.y_test, y_pred, average=average), 3)
+        precision = round(precision_score(self.y_test, y_pred, average=average), 3)
+        f1 = round(f1_score(self.y_test, y_pred, average=average), 3)
+        auc = round(roc_auc_score(self.y_test, y_pred, multi_class=multi_class), 3)
 
         metrics_dict = {
             "Accuracy": accuracy,
@@ -134,17 +134,17 @@ class ClassifierHandler:
         return metrics_dict
     
     
-    def apply_logistic(self, penalty):
+    def apply_logistic(self, penalty, average, multi_class):
 
         regression = LogisticRegression(penalty=penalty)
         regression.fit(self.X_train,self.y_train)
         y_pred = regression.predict(self.X_test)
 
-        metrics = self.evaluation_metrics(y_pred)
+        metrics = self.evaluation_metrics(y_pred, average, multi_class)
 
         return metrics
 
-    def apply_decision_tree(self, model_name, criterion=None,  max_depth=None, min_samples_split=None, min_samples_leaf=None, max_features=None, max_leaf_nodes=None, min_impurity_decrease=None, splitter=None, n_estimators=None, bootstrap=None, eta=None):
+    def apply_decision_tree(self, model_name, criterion=None,  max_depth=None, min_samples_split=None, min_samples_leaf=None, max_features=None, max_leaf_nodes=None, min_impurity_decrease=None, splitter=None, n_estimators=None, bootstrap=None, eta=None, average=None, multi_class=None):
 
         if model_name == "Decision Tree":
             clf = DecisionTreeClassifier(criterion=criterion,splitter=splitter,max_depth=max_depth,random_state=42,min_samples_split=min_samples_split,min_samples_leaf=min_samples_leaf,max_features=max_features,max_leaf_nodes=max_leaf_nodes,min_impurity_decrease=min_impurity_decrease)
@@ -156,10 +156,21 @@ class ClassifierHandler:
         clf.fit(self.X_train, self.y_train)
         y_pred = clf.predict(self.X_test)
 
-        metrics = self.evaluation_metrics(y_pred)
+        metrics = self.evaluation_metrics(y_pred, average, multi_class)
 
         return metrics
     
+
+    def apply_svc(self, kernal, degree, gamma, average, multi_class):
+
+        clf = SVC(kernel=kernal, gamma=gamma, degree=degree)
+        clf.fit(self.X_train, self.y_train)
+
+        y_pred = clf.predict(self.X_test)
+
+        metrics = self.evaluation_metrics(y_pred, average, multi_class)
+        
+        return metrics
 
 
     def apply_model(self, metrics_dict):

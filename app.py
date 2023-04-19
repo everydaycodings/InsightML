@@ -9,7 +9,7 @@ logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precisio
 problem_selector_options = ["Regression Problem", "Classifier Problem"]
 
 regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression", "XGBoost"]
-classifier_multi_model_problem = ["Lasso Regression", "Decision Tree", "Random Forest", "XGBoost"]
+classifier_multi_model_problem = ["Lasso Regression", "Decision Tree", "Random Forest", "XGBoost", "Support Vector Classification"]
 
 
 
@@ -383,6 +383,11 @@ if file_upload is not None:
                     max_depth = int(st.number_input('Max Depth', key=111))
                     if max_depth == 0:
                         max_depth = None
+                
+                if "Support Vector Classification" in classification_model_selected:
+                    svc_kernal = st.selectbox("Select the kernal for SVR: ", options=["linear", "poly", "rbf", "sigmoid", "precomputed"], index=2)
+                    svc_degree = st.number_input("Input The Degree for SVR: ", min_value=0, step=1, value=3)
+                    svc_gama = st.selectbox("Select the Gama for SVR: ", options=["scale", "auto"], index=0)
 
                 if "Random Forest" in classification_model_selected or "Decision Tree" in classification_model_selected:
                     criterion = st.selectbox(
@@ -405,6 +410,19 @@ if file_upload is not None:
                     if max_leaf_nodes == 0:
                         max_leaf_nodes = None
 
+            
+            with st.sidebar.expander("Evaluation Metrics Hyperparameters"):
+                is_multiclass = st.selectbox("Do you have mult-class Target: ", options=[True, False], index=1)
+
+                if is_multiclass:
+                    average = st.selectbox("Select your f1 score Average: ", options=["micro", "macro", "samples", "weighted", "binary", None], index=4)
+                    multi_class = st.selectbox("Select your multi_class for ROC-AUC Score: ", options=["raise", "ovr", "ovo"], index=0)
+                
+                else:
+                    average = "binary"
+                    multi_class = "raise"
+
+            
             if st.sidebar.button("Evaluate"):
 
                 classifier_model = ClassifierHandler(X_train, X_test, y_train, y_test)
@@ -414,17 +432,20 @@ if file_upload is not None:
                 for algo in classification_model_selected:
 
                     if algo == "Lasso Regression":
-                        lasso_regression_result = classifier_model.apply_logistic(penalty)
+                        lasso_regression_result = classifier_model.apply_logistic(penalty, average, multi_class)
                         metrics_dict[algo] = lasso_regression_result
                     elif algo == "Decision Tree":
-                        decision_tree_result = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter)
+                        decision_tree_result = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter, average=average, multi_class=multi_class)
                         metrics_dict[algo] = decision_tree_result
                     elif algo == "Random Forest":
-                        random_forest_result = classifier_model.apply_decision_tree(model_name="Random Forest", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap)
+                        random_forest_result = classifier_model.apply_decision_tree(model_name="Random Forest", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap, average=average, multi_class=multi_class)
                         metrics_dict[algo] = random_forest_result
                     elif algo == "XGBoost":
-                        xgboost_result = classifier_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta)
+                        xgboost_result = classifier_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta, average=average, multi_class=multi_class)
                         metrics_dict[algo] =xgboost_result
+                    elif algo == "Support Vector Classification":
+                        svc_result = classifier_model.apply_svc(kernal=svc_kernal, degree=svc_degree, gamma=svc_gama, average=average, multi_class=multi_class)
+                        metrics_dict[algo] =svc_result
 
                 metrics_dataframe = classifier_model.apply_model(metrics_dict)
                 st.title("Classification Results: ")
