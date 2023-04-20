@@ -13,6 +13,8 @@ from xgboost import XGBRegressor, XGBClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, ConfusionMatrixDisplay, confusion_matrix, RocCurveDisplay, PrecisionRecallDisplay, precision_recall_curve
 
 
+round_off_limit = 4
+
 class RegressionHandler:
 
     def __init__(self, X_train, X_test, y_train, y_test):
@@ -26,16 +28,16 @@ class RegressionHandler:
 
         cv_score = cross_val_score(estimator = model, X = self.X_train, y = self.y_train, cv = 10)
         
-        mae = round(metrics.mean_absolute_error(self.y_test, y_pred), 2)
-        mse = round(metrics.mean_squared_error(self.y_test, y_pred), 2)
-        r2 = round(model.score(self.X_test, self.y_test), 2)
+        mae = round(metrics.mean_absolute_error(self.y_test, y_pred), round_off_limit)
+        mse = round(metrics.mean_squared_error(self.y_test, y_pred), round_off_limit)
+        r2 = round(model.score(self.X_test, self.y_test), round_off_limit)
         
         r2_ = model.score(self.X_test, self.y_test)
         n = self.X_test.shape[0]
         p = self.X_test.shape[1]
-        adjusted_r2 = round(1-(1-r2_)*(n-1)/(n-p-1), 2)
-        RMSE = round(np.sqrt(mse), 2)
-        CV_R2 = round(cv_score.mean(), 2)
+        adjusted_r2 = round(1-(1-r2_)*(n-1)/(n-p-1), round_off_limit)
+        RMSE = round(np.sqrt(mse), round_off_limit)
+        CV_R2 = round(cv_score.mean(), round_off_limit)
         metrics_dict = {
             "MAE": mae,
             "MSE": mse,
@@ -116,12 +118,27 @@ class ClassifierHandler:
 
     
     def evaluation_metrics(self, y_pred, average, multi_class):
-
-        accuracy = round(accuracy_score(self.y_test, y_pred), 3)
-        recall = round(recall_score(self.y_test, y_pred, average=average), 3)
-        precision = round(precision_score(self.y_test, y_pred, average=average), 3)
-        f1 = round(f1_score(self.y_test, y_pred, average=average), 3)
-        auc = round(roc_auc_score(self.y_test, y_pred, multi_class=multi_class), 3)
+        
+        try:
+            accuracy = round(accuracy_score(self.y_test, y_pred), round_off_limit)
+        except:
+            accuracy = "Some Error Occured"
+        try:
+            recall = round(recall_score(self.y_test, y_pred, average=average), round_off_limit)
+        except:
+            recall = "Some Error Occured"
+        try:
+            precision = round(precision_score(self.y_test, y_pred, average=average), round_off_limit)
+        except:
+            precision = "Some Error Occured"
+        try:
+            f1 = round(f1_score(self.y_test, y_pred, average=average), round_off_limit)
+        except:
+            f1 = "Some Error Occured"
+        try:
+            auc = round(roc_auc_score(self.y_test, y_pred, multi_class=multi_class), round_off_limit)
+        except:
+            auc = "Some Error Occured"
 
         metrics_dict = {
             "Accuracy": accuracy,
