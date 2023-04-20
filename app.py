@@ -265,6 +265,7 @@ if file_upload is not None:
                     multi_layer_perceptron = classifier_model.apply_perceptron(model_name="Multi-Layer Perceptron", average=average, multi_class=multi_class)
                     metrics_dict[algo] = multi_layer_perceptron
 
+                    
             metrics_dataframe = classifier_model.apply_model(metrics_dict)
             st.title("Classification Results: ")
             st.dataframe(metrics_dataframe)
