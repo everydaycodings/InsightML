@@ -11,7 +11,8 @@ problem_selector_options = ["Regression Problem", "Classifier Problem"]
 regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression", "XGBoost"]
 classifier_multi_model_problem = ["Lasso Regression","SGDClassifier",
                                    "Decision Tree", "Random Forest", "XGBoost",
-                                   "Support Vector Classification"
+                                   "Support Vector Classification",
+                                   "Naive Bayes"
                                 ]
 
 
@@ -240,6 +241,10 @@ if file_upload is not None:
                 elif algo == "Support Vector Classification":
                     svc_result = classifier_model.apply_svc(kernal=svc_kernal, degree=svc_degree, gamma=svc_gama, average=average, multi_class=multi_class)
                     metrics_dict[algo] =svc_result
+                
+                elif algo == "Naive Bayes":
+                    naive_bayes = classifier_model.apply_naive_bayse(model_name="Naive Bayes", average=average, multi_class=multi_class)
+                    metrics_dict[algo] =naive_bayes
 
             metrics_dataframe = classifier_model.apply_model(metrics_dict)
             st.title("Classification Results: ")

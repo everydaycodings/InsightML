@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.svm import SVR, SVC
 from xgboost import XGBRegressor, XGBClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, ConfusionMatrixDisplay, confusion_matrix, RocCurveDisplay, PrecisionRecallDisplay, precision_recall_curve
-
+from sklearn.naive_bayes import GaussianNB
 
 round_off_limit = 4
 
@@ -157,7 +157,7 @@ class ClassifierHandler:
             regression = LogisticRegression(penalty=penalty)
         if model_name == "SGDClassifier":
             regression = SGDClassifier(loss=loss, penalty=penalty, alpha=alpha)
-            
+
         regression.fit(self.X_train,self.y_train)
         y_pred = regression.predict(self.X_test)
 
@@ -193,6 +193,16 @@ class ClassifierHandler:
         
         return metrics
 
+    def apply_naive_bayse(self, model_name, average, multi_class):
+
+        if model_name == "Naive Bayes":
+            clf = GaussianNB()
+
+        clf.fit(self.X_train, self.y_train)
+        y_pred = clf.predict(self.X_test)
+        metrics = self.evaluation_metrics(y_pred, average, multi_class)
+        
+        return metrics
 
     def apply_model(self, metrics_dict):
 
