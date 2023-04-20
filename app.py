@@ -13,7 +13,8 @@ classifier_multi_model_problem = ["Lasso Regression","SGDClassifier",
                                    "Decision Tree", "Random Forest", "XGBoost",
                                    "AdaBoost",
                                    "Support Vector Classification",
-                                   "Naive Bayes"
+                                   "Naive Bayes",
+                                   "Perceptron", "Multi-Layer Perceptron"
                                 ]
 
 
@@ -251,14 +252,18 @@ if file_upload is not None:
                 elif algo == "Support Vector Classification":
                     svc_result = classifier_model.apply_svc(kernal=svc_kernal, degree=svc_degree, gamma=svc_gama, average=average, multi_class=multi_class)
                     metrics_dict[algo] =svc_result
-                
                 elif algo == "Naive Bayes":
                     naive_bayes_result = classifier_model.apply_naive_bayse(model_name="Naive Bayes", average=average, multi_class=multi_class)
                     metrics_dict[algo] = naive_bayes_result
-                
                 elif algo == "AdaBoost":
                     adaboost_result = classifier_model.apply_decision_tree_v2(model_name="AdaBoost", n_estimators=ada_boost_n_estimators, learning_rate=ada_boost_learning_rate, algorithm=ada_boost_algorithm, random_state=ada_boost_random_state, average=average, multi_class=multi_class)
                     metrics_dict[algo] = adaboost_result
+                elif algo == "Perceptron":
+                    perceptron_result = classifier_model.apply_perceptron(model_name="Perceptron", average=average, multi_class=multi_class)
+                    metrics_dict[algo] = perceptron_result
+                elif algo == "Multi-Layer Perceptron":
+                    multi_layer_perceptron = classifier_model.apply_perceptron(model_name="Multi-Layer Perceptron", average=average, multi_class=multi_class)
+                    metrics_dict[algo] = multi_layer_perceptron
 
             metrics_dataframe = classifier_model.apply_model(metrics_dict)
             st.title("Classification Results: ")

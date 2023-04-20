@@ -2,7 +2,7 @@ import numpy as np
 import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet, LogisticRegression, SGDClassifier
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet, LogisticRegression, SGDClassifier, Perceptron
 from sklearn.model_selection import cross_val_score
 import numpy as np
 from sklearn import metrics
@@ -12,6 +12,7 @@ from sklearn.svm import SVR, SVC
 from xgboost import XGBRegressor, XGBClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, ConfusionMatrixDisplay, confusion_matrix, RocCurveDisplay, PrecisionRecallDisplay, precision_recall_curve
 from sklearn.naive_bayes import GaussianNB
+from sklearn.neural_network import MLPClassifier
 
 round_off_limit = 4
 
@@ -215,6 +216,19 @@ class ClassifierHandler:
         metrics = self.evaluation_metrics(y_pred, average, multi_class)
         
         return metrics
+
+    def apply_perceptron(self, model_name, average, multi_class):
+
+        if model_name == "Multi-Layer Perceptron":
+            clf = MLPClassifier()
+        if model_name == "Perceptron":
+            clf = Perceptron()
+        clf.fit(self.X_train, self.y_train)
+        y_pred = clf.predict(self.X_test)
+        metrics = self.evaluation_metrics(y_pred, average, multi_class)
+        
+        return metrics
+
 
     def apply_model(self, metrics_dict):
 
