@@ -7,7 +7,7 @@ from sklearn.model_selection import cross_val_score
 import numpy as np
 from sklearn import metrics
 from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
-from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, AdaBoostClassifier
 from sklearn.svm import SVR, SVC
 from xgboost import XGBRegressor, XGBClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, ConfusionMatrixDisplay, confusion_matrix, RocCurveDisplay, PrecisionRecallDisplay, precision_recall_curve
@@ -181,6 +181,18 @@ class ClassifierHandler:
 
         return metrics
     
+    def apply_decision_tree_v2(self, model_name, n_estimators, learning_rate, algorithm, random_state, average, multi_class):
+
+        if model_name == "AdaBoost":
+            clf = AdaBoostClassifier(n_estimators=n_estimators, learning_rate=learning_rate, algorithm=algorithm, random_state=random_state)
+
+        clf.fit(self.X_train, self.y_train)
+        y_pred = clf.predict(self.X_test)
+
+        metrics = self.evaluation_metrics(y_pred, average, multi_class)
+
+        return metrics
+
 
     def apply_svc(self, kernal, degree, gamma, average, multi_class):
 

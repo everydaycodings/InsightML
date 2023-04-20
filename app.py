@@ -11,6 +11,7 @@ problem_selector_options = ["Regression Problem", "Classifier Problem"]
 regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression", "XGBoost"]
 classifier_multi_model_problem = ["Lasso Regression","SGDClassifier",
                                    "Decision Tree", "Random Forest", "XGBoost",
+                                   "AdaBoost",
                                    "Support Vector Classification",
                                    "Naive Bayes"
                                 ]
@@ -169,13 +170,22 @@ if file_upload is not None:
                 n_estimators = st.number_input("The number of trees in the Random forest: ", min_value=1, value=100, step=1)
                 bootstrap = st.selectbox("Choose Weather To Bootstrap (Random Forest): ", options=[True, False], index=0)
 
-            if "XGBoost" in classification_model_selected or "Decision Tree" not in classification_model_selected or "XGBoost" not in classification_model_selected:
+            if "XGBoost" in classification_model_selected or "Decision Tree" not in classification_model_selected:
                 eta = round(st.number_input("Choose Your Learning rate for XGBoost: ", min_value=0.0, max_value=1.0, value=0.3, step=0.001),3)
                 st.text("Your Learning rate is : {}".format(eta))
-                max_depth = int(st.number_input('Max Depth', key=111))
+                max_depth = int(st.number_input('Max Depth for XGBoost', key=111))
                 if max_depth == 0:
                     max_depth = None
             
+            if "AdaBoost" in classification_model_selected:
+                ada_boost_n_estimators = st.number_input("Select Your estimators for AdaBoost: ", min_value=1, value=50, step=1)
+                ada_boost_learning_rate = st.number_input("Select Your Learning Rate for AdaBoost: ", min_value=0.1, value=1.0, step=0.1)
+                ada_boost_algorithm = st.selectbox("Select your algorithm for AdaBoost: ", options=["SAMME", "SAMME.R"], index=1)
+                ada_boost_random_state = st.number_input("Select your Random State for AdaBoost: ", value=282828)
+                st.text("282828 mean random state will be None")
+                if ada_boost_random_state == 282828:
+                    ada_boost_random_state = None
+
             if "Support Vector Classification" in classification_model_selected:
                 svc_kernal = st.selectbox("Select the kernal for SVR: ", options=["linear", "poly", "rbf", "sigmoid", "precomputed"], index=2)
                 svc_degree = st.number_input("Input The Degree for SVR: ", min_value=0, step=1, value=3)
@@ -243,8 +253,12 @@ if file_upload is not None:
                     metrics_dict[algo] =svc_result
                 
                 elif algo == "Naive Bayes":
-                    naive_bayes = classifier_model.apply_naive_bayse(model_name="Naive Bayes", average=average, multi_class=multi_class)
-                    metrics_dict[algo] =naive_bayes
+                    naive_bayes_result = classifier_model.apply_naive_bayse(model_name="Naive Bayes", average=average, multi_class=multi_class)
+                    metrics_dict[algo] = naive_bayes_result
+                
+                elif algo == "AdaBoost":
+                    adaboost_result = classifier_model.apply_decision_tree_v2(model_name="AdaBoost", n_estimators=ada_boost_n_estimators, learning_rate=ada_boost_learning_rate, algorithm=ada_boost_algorithm, random_state=ada_boost_random_state, average=average, multi_class=multi_class)
+                    metrics_dict[algo] = adaboost_result
 
             metrics_dataframe = classifier_model.apply_model(metrics_dict)
             st.title("Classification Results: ")
