@@ -12,6 +12,7 @@ regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lass
 classifier_multi_model_problem = ["Lasso Regression","SGDClassifier",
                                    "Decision Tree", "Random Forest", "XGBoost",
                                    "AdaBoost",
+                                   "K-Neighbors",
                                    "Support Vector Classification",
                                    "Naive Bayes",
                                    "Perceptron", "Multi-Layer Perceptron"
@@ -262,10 +263,12 @@ if file_upload is not None:
                     perceptron_result = classifier_model.apply_perceptron(model_name="Perceptron", average=average, multi_class=multi_class)
                     metrics_dict[algo] = perceptron_result
                 elif algo == "Multi-Layer Perceptron":
-                    multi_layer_perceptron = classifier_model.apply_perceptron(model_name="Multi-Layer Perceptron", average=average, multi_class=multi_class)
-                    metrics_dict[algo] = multi_layer_perceptron
+                    multi_layer_perceptron_result = classifier_model.apply_perceptron(model_name="Multi-Layer Perceptron", average=average, multi_class=multi_class)
+                    metrics_dict[algo] = multi_layer_perceptron_result
+                elif algo == "K-Neighbors":
+                    K_Neighbors_result = classifier_model.appply_neighbors(model_name="K-Neighbors", average=average, multi_class=multi_class)
+                    metrics_dict[algo] = K_Neighbors_result
 
-                    
             metrics_dataframe = classifier_model.apply_model(metrics_dict)
             st.title("Classification Results: ")
             st.dataframe(metrics_dataframe)

@@ -13,6 +13,7 @@ from xgboost import XGBRegressor, XGBClassifier
 from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, ConfusionMatrixDisplay, confusion_matrix, RocCurveDisplay, PrecisionRecallDisplay, precision_recall_curve
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 round_off_limit = 4
 
@@ -229,6 +230,16 @@ class ClassifierHandler:
         
         return metrics
 
+    def appply_neighbors(self, model_name, average, multi_class):
+
+        if model_name == "K-Neighbors":
+            clf = KNeighborsClassifier()
+            
+        clf.fit(self.X_train, self.y_train)
+        y_pred = clf.predict(self.X_test)
+        metrics = self.evaluation_metrics(y_pred, average, multi_class)
+        
+        return metrics
 
     def apply_model(self, metrics_dict):
 
