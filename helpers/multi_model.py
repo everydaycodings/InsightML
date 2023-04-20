@@ -151,9 +151,13 @@ class ClassifierHandler:
         return metrics_dict
     
     
-    def apply_logistic(self, penalty, average, multi_class):
+    def apply_linear(self, model_name, penalty, average, multi_class, loss=None, alpha=None):
 
-        regression = LogisticRegression(penalty=penalty)
+        if model_name == "Logistic Regression":
+            regression = LogisticRegression(penalty=penalty)
+        if model_name == "SGDClassifier":
+            regression = SGDClassifier(loss=loss, penalty=penalty, alpha=alpha)
+            
         regression.fit(self.X_train,self.y_train)
         y_pred = regression.predict(self.X_test)
 

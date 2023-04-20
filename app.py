@@ -9,7 +9,10 @@ logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precisio
 problem_selector_options = ["Regression Problem", "Classifier Problem"]
 
 regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression", "XGBoost"]
-classifier_multi_model_problem = ["Lasso Regression", "Decision Tree", "Random Forest", "XGBoost", "Support Vector Classification"]
+classifier_multi_model_problem = ["Lasso Regression","SGDClassifier",
+                                   "Decision Tree", "Random Forest", "XGBoost",
+                                   "Support Vector Classification"
+                                ]
 
 
 
@@ -153,8 +156,13 @@ if file_upload is not None:
             
         with st.sidebar.expander("Hyperparameters"):
 
-            if "Lasso Regression" in classification_model_selected:
+            if "Lasso Regression" in classification_model_selected or "SGDClassifier" in classification_model_selected:
                 penalty = st.selectbox("Select the penalty: ", options=["l1", "l2", "elasticnet", None], index=1)
+            
+            if "SGDClassifier" in classification_model_selected:
+                sgd_loss = st.selectbox("Select Your Loss Function (SGDClassifier): ", options=["hinge", "log_loss", "log", "modified_huber", "squared_hinge", "perceptron", "squared_error", "huber", "epsilon_insensitive", "squared_epsilon_insensitive"], index=0)
+                sgd_alpha = round(st.number_input("Select the alpha: ", min_value=0.00000, value=0.0001, step=0.00001),5)
+                st.text("SGD Alpha Value is: {}".format(sgd_alpha))
 
             if "Random Forest" in classification_model_selected or "XGBoost" in classification_model_selected:
                 n_estimators = st.number_input("The number of trees in the Random forest: ", min_value=1, value=100, step=1)
@@ -215,7 +223,10 @@ if file_upload is not None:
             for algo in classification_model_selected:
 
                 if algo == "Lasso Regression":
-                    lasso_regression_result = classifier_model.apply_logistic(penalty, average, multi_class)
+                    lasso_regression_result = classifier_model.apply_linear(model_name="Logistic Regression", penalty=penalty, average=average, multi_class=multi_class)
+                    metrics_dict[algo] = lasso_regression_result
+                elif algo == "SGDClassifier":
+                    lasso_regression_result = classifier_model.apply_linear(model_name="SGDClassifier", penalty=penalty, average=average, multi_class=multi_class, loss=sgd_loss, alpha=sgd_alpha)
                     metrics_dict[algo] = lasso_regression_result
                 elif algo == "Decision Tree":
                     decision_tree_result = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter, average=average, multi_class=multi_class)
