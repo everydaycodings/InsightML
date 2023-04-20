@@ -2,7 +2,7 @@ import numpy as np
 import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet, LogisticRegression
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet, LogisticRegression, SGDClassifier
 from sklearn.model_selection import cross_val_score
 import numpy as np
 from sklearn import metrics
