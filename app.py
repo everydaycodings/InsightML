@@ -8,7 +8,11 @@ linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "C
 logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precision Recall Curve"]
 problem_selector_options = ["Regression Problem", "Classifier Problem"]
 
-regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Decision Tree", "Random Forest", "Support Vector Regression", "XGBoost"]
+regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Polynomial Regression",
+                                  "Decision Tree", "Random Forest", "XGBoost",
+                                  "Support Vector Regression", 
+                                  ]
+
 classifier_multi_model_problem = ["Lasso Regression","SGDClassifier",
                                    "Decision Tree", "Random Forest", "XGBoost",
                                    "AdaBoost",
@@ -70,6 +74,9 @@ if file_upload is not None:
             if "ElasticNet Regression" in regression_model_selected:
                 l1_ratio_selector = st.number_input("L1 ratio for ElasticNet(optional): ", min_value=0.1, max_value=1.0, value=0.5)                
             
+            if "Polynomial Regression" in regression_model_selected:
+                poly_degree = st.number_input("Enter the degree for Polynomial Regression: ", min_value=0, step=1)
+
             if "Random Forest" in regression_model_selected or "XGBoost" in regression_model_selected:
                 n_estimators = st.number_input("The number of trees in the Random forest: ", min_value=1, value=100, step=1)
                 bootstrap = st.selectbox("Choose Weather To Bootstrap (Random Forest): ", options=[True, False], index=0)
@@ -143,10 +150,12 @@ if file_upload is not None:
                     xgboost_regression_result = regression_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta)
                     metrics_dict[algo] = xgboost_regression_result
                 
-            
-            metrics_dataframe = regression_model.apply_model(metrics_dict)
-            
+                if algo == "Polynomial Regression":
+                    polynomial_regression_result = regression_model.apply_linear_regression(model_name="Polynomial Regression", degree=poly_degree)
+                    metrics_dict[algo] = polynomial_regression_result
 
+
+            metrics_dataframe = regression_model.apply_model(metrics_dict)
             st.title("Regression Results: ")
             st.dataframe(metrics_dataframe)
     

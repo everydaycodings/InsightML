@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Lasso, Ridge, ElasticNet, LogisticRegression, SGDClassifier, Perceptron
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import cross_val_score
 import numpy as np
 from sklearn import metrics
@@ -51,7 +52,7 @@ class RegressionHandler:
 
         return metrics_dict
 
-    def apply_linear_regression(self, model_name, alpha=None, l1_ratio=None):
+    def apply_linear_regression(self, model_name, alpha=None, l1_ratio=None, degree=None):
         
         if model_name == "Linear Regression":
             regression=LinearRegression()
@@ -61,6 +62,11 @@ class RegressionHandler:
             regression=Ridge(alpha=alpha)
         elif model_name == "ElasticNet Regression":
             regression = ElasticNet(alpha=alpha, l1_ratio=l1_ratio)
+        elif model_name == "Polynomial Regression":
+            poly = PolynomialFeatures(degree=degree)
+            self.X_train = poly.fit_transform(self.X_train)
+            self.X_test = poly.transform(self.X_test)
+            regression = LinearRegression()
 
         regression.fit(self.X_train,self.y_train)
         y_pred = regression.predict(self.X_test)
