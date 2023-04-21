@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
-from helpers.single_model import Utils, ApplyLinearRegression, ApplyLogisticRegression, ApplyDecisionTreeRegressor, ApplyDecisionTreeClassifier
+from helpers.utils import Utils
+from helpers.single_model import ApplyLinearRegression, ApplyLogisticRegression, ApplyDecisionTreeRegressor, ApplyDecisionTreeClassifier
 from helpers.multi_model import RegressionHandler, ClassifierHandler
+
 
 models_list = ["Linear Regression", "Logistic Regression", "Decision Tree Regression", "Decision Tree Classifier"]
 linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "Cross Validated R2"]
@@ -34,9 +36,63 @@ if file_upload is not None:
 
     data = Utils().read_file(file_upload)
     
-    if st.sidebar.checkbox("Display Data", value=True):
-        st.title("Uploaded Dataset")
+    if st.sidebar.checkbox("Display Dataset Info", value=True):
+        describe, shape, columns, num_category, str_category, null_values, dtypes, unique, str_category, column_with_null_values = Utils().describe(data)
+
+
+        st.title("Dataset Preview")
         st.dataframe(data)
+
+        st.text(" ")
+        st.text(" ")
+        st.text(" ")
+
+        st.subheader("Dataset Description")
+        st.write(describe)
+
+        st.text(" ")
+        st.text(" ")
+        st.text(" ")
+
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.text("Basic Information")
+            st.write("Dataset Name")
+            st.text(file_upload.name)
+
+            st.write("Dataset Size(MB)")
+            number = round((file_upload.size*0.000977)*0.000977,2)
+            st.write(number)
+
+            st.write("Dataset Shape")
+            st.write(shape)
+            
+        with col2:
+            st.text("Dataset Columns")
+            st.write(columns)
+        
+        with col3:
+            st.text("Numeric Columns")
+            st.dataframe(num_category)
+        
+        with col4:
+            st.text("String Columns")
+            st.dataframe(str_category)
+            
+
+        col5, col6, col7= st.columns(3)
+
+        with col5:
+            st.text("Columns Data-Type")
+            st.dataframe(dtypes)
+        
+        with col6:
+            st.text("Counted Unique Values")
+            st.write(unique)
+        
+        with col7:
+            st.write("Counted Null Values")
+            st.dataframe(null_values)
     
     
     
