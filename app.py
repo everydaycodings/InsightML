@@ -43,16 +43,8 @@ if file_upload is not None:
         st.title("Dataset Preview")
         st.dataframe(data)
 
-        st.text(" ")
-        st.text(" ")
-        st.text(" ")
-
         st.subheader("Dataset Description")
         st.write(describe)
-
-        st.text(" ")
-        st.text(" ")
-        st.text(" ")
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -131,7 +123,7 @@ if file_upload is not None:
                 l1_ratio_selector = st.number_input("L1 ratio for ElasticNet(optional): ", min_value=0.1, max_value=1.0, value=0.5)                
             
             if "Polynomial Regression" in regression_model_selected:
-                poly_degree = st.number_input("Enter the degree for Polynomial Regression: ", min_value=0, step=1)
+                poly_degree = st.number_input("Enter the degree for Polynomial Regression: ", min_value=0, step=1, value=2)
 
             if "Random Forest" in regression_model_selected or "XGBoost" in regression_model_selected:
                 n_estimators = st.number_input("The number of trees in the Random forest: ", min_value=1, value=100, step=1)
@@ -175,45 +167,46 @@ if file_upload is not None:
             
         if st.sidebar.button("Evaluate"):
 
-            regression_model = RegressionHandler(X_train, X_test, y_train, y_test)
+            with st.spinner("Evaluating Model..."):
+                regression_model = RegressionHandler(X_train, X_test, y_train, y_test)
 
-            metrics_dict = {}
+                metrics_dict = {}
 
-            for algo in regression_model_selected:
-                if algo == "Linear Regression":
-                    linear_regression_result = regression_model.apply_linear_regression(model_name="Linear Regression")
-                    metrics_dict[algo] = linear_regression_result
-                if algo == "Lasso Regression":
-                    lasso_regression_result = regression_model.apply_linear_regression(model_name="Lasso Regression", alpha=apha_value_selector)
-                    metrics_dict[algo] = lasso_regression_result
-                if algo == "Ridge Regression":
-                    ridge_regression_result = regression_model.apply_linear_regression(model_name="Ridge Regression", alpha=apha_value_selector)
-                    metrics_dict[algo] = ridge_regression_result
-                if algo == "ElasticNet Regression":
-                    elastic_regression_result = regression_model.apply_linear_regression(model_name="ElasticNet Regression", alpha=apha_value_selector, l1_ratio=l1_ratio_selector)
-                    metrics_dict[algo] = elastic_regression_result
-                if algo == "Decision Tree":
-                    decision_tree_regression_result = regression_model.apply_decision_tree(model_name="Decision Tree",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter)
-                    metrics_dict[algo] = decision_tree_regression_result
-                if algo == "Random Forest":
-                    random_forest_regression_result = regression_model.apply_decision_tree(model_name="Random Forest",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap)
-                    metrics_dict[algo] = random_forest_regression_result
-                if algo == "Support Vector Regression":
-                    svr_regression_result = regression_model.apply_svr(kernal=svr_kernal, degree=svr_degree, gamma=svr_gama)
-                    metrics_dict[algo] = svr_regression_result
-                
-                if algo == "XGBoost":
-                    xgboost_regression_result = regression_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta)
-                    metrics_dict[algo] = xgboost_regression_result
-                
-                if algo == "Polynomial Regression":
-                    polynomial_regression_result = regression_model.apply_linear_regression(model_name="Polynomial Regression", degree=poly_degree)
-                    metrics_dict[algo] = polynomial_regression_result
+                for algo in regression_model_selected:
+                    if algo == "Linear Regression":
+                        linear_regression_result = regression_model.apply_linear_regression(model_name="Linear Regression")
+                        metrics_dict[algo] = linear_regression_result
+                    if algo == "Lasso Regression":
+                        lasso_regression_result = regression_model.apply_linear_regression(model_name="Lasso Regression", alpha=apha_value_selector)
+                        metrics_dict[algo] = lasso_regression_result
+                    if algo == "Ridge Regression":
+                        ridge_regression_result = regression_model.apply_linear_regression(model_name="Ridge Regression", alpha=apha_value_selector)
+                        metrics_dict[algo] = ridge_regression_result
+                    if algo == "ElasticNet Regression":
+                        elastic_regression_result = regression_model.apply_linear_regression(model_name="ElasticNet Regression", alpha=apha_value_selector, l1_ratio=l1_ratio_selector)
+                        metrics_dict[algo] = elastic_regression_result
+                    if algo == "Decision Tree":
+                        decision_tree_regression_result = regression_model.apply_decision_tree(model_name="Decision Tree",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter)
+                        metrics_dict[algo] = decision_tree_regression_result
+                    if algo == "Random Forest":
+                        random_forest_regression_result = regression_model.apply_decision_tree(model_name="Random Forest",criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap)
+                        metrics_dict[algo] = random_forest_regression_result
+                    if algo == "Support Vector Regression":
+                        svr_regression_result = regression_model.apply_svr(kernal=svr_kernal, degree=svr_degree, gamma=svr_gama)
+                        metrics_dict[algo] = svr_regression_result
+                    
+                    if algo == "XGBoost":
+                        xgboost_regression_result = regression_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta)
+                        metrics_dict[algo] = xgboost_regression_result
+                    
+                    if algo == "Polynomial Regression":
+                        polynomial_regression_result = regression_model.apply_linear_regression(model_name="Polynomial Regression", degree=poly_degree)
+                        metrics_dict[algo] = polynomial_regression_result
 
 
-            metrics_dataframe = regression_model.apply_model(metrics_dict)
-            st.title("Regression Results: ")
-            st.dataframe(metrics_dataframe)
+                metrics_dataframe = regression_model.apply_model(metrics_dict)
+                st.title("Regression Results: ")
+                st.dataframe(metrics_dataframe)
     
     
     
@@ -294,46 +287,48 @@ if file_upload is not None:
         
         if st.sidebar.button("Evaluate"):
 
-            classifier_model = ClassifierHandler(X_train, X_test, y_train, y_test)
+            with st.spinner("Evaluating Model..."):
 
-            metrics_dict = {}
+                classifier_model = ClassifierHandler(X_train, X_test, y_train, y_test)
 
-            for algo in classification_model_selected:
+                metrics_dict = {}
 
-                if algo == "Lasso Regression":
-                    lasso_regression_result = classifier_model.apply_linear(model_name="Logistic Regression", penalty=penalty, average=average, multi_class=multi_class)
-                    metrics_dict[algo] = lasso_regression_result
-                elif algo == "SGDClassifier":
-                    lasso_regression_result = classifier_model.apply_linear(model_name="SGDClassifier", penalty=penalty, average=average, multi_class=multi_class, loss=sgd_loss, alpha=sgd_alpha)
-                    metrics_dict[algo] = lasso_regression_result
-                elif algo == "Decision Tree":
-                    decision_tree_result = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter, average=average, multi_class=multi_class)
-                    metrics_dict[algo] = decision_tree_result
-                elif algo == "Random Forest":
-                    random_forest_result = classifier_model.apply_decision_tree(model_name="Random Forest", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap, average=average, multi_class=multi_class)
-                    metrics_dict[algo] = random_forest_result
-                elif algo == "XGBoost":
-                    xgboost_result = classifier_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta, average=average, multi_class=multi_class)
-                    metrics_dict[algo] =xgboost_result
-                elif algo == "Support Vector Classification":
-                    svc_result = classifier_model.apply_svc(kernal=svc_kernal, degree=svc_degree, gamma=svc_gama, average=average, multi_class=multi_class)
-                    metrics_dict[algo] =svc_result
-                elif algo == "Naive Bayes":
-                    naive_bayes_result = classifier_model.apply_naive_bayse(model_name="Naive Bayes", average=average, multi_class=multi_class)
-                    metrics_dict[algo] = naive_bayes_result
-                elif algo == "AdaBoost":
-                    adaboost_result = classifier_model.apply_decision_tree_v2(model_name="AdaBoost", n_estimators=ada_boost_n_estimators, learning_rate=ada_boost_learning_rate, algorithm=ada_boost_algorithm, random_state=ada_boost_random_state, average=average, multi_class=multi_class)
-                    metrics_dict[algo] = adaboost_result
-                elif algo == "Perceptron":
-                    perceptron_result = classifier_model.apply_perceptron(model_name="Perceptron", average=average, multi_class=multi_class)
-                    metrics_dict[algo] = perceptron_result
-                elif algo == "Multi-Layer Perceptron":
-                    multi_layer_perceptron_result = classifier_model.apply_perceptron(model_name="Multi-Layer Perceptron", average=average, multi_class=multi_class)
-                    metrics_dict[algo] = multi_layer_perceptron_result
-                elif algo == "K-Neighbors":
-                    K_Neighbors_result = classifier_model.appply_neighbors(model_name="K-Neighbors", average=average, multi_class=multi_class)
-                    metrics_dict[algo] = K_Neighbors_result
+                for algo in classification_model_selected:
 
-            metrics_dataframe = classifier_model.apply_model(metrics_dict)
-            st.title("Classification Results: ")
-            st.dataframe(metrics_dataframe)
+                    if algo == "Lasso Regression":
+                        lasso_regression_result = classifier_model.apply_linear(model_name="Logistic Regression", penalty=penalty, average=average, multi_class=multi_class)
+                        metrics_dict[algo] = lasso_regression_result
+                    elif algo == "SGDClassifier":
+                        lasso_regression_result = classifier_model.apply_linear(model_name="SGDClassifier", penalty=penalty, average=average, multi_class=multi_class, loss=sgd_loss, alpha=sgd_alpha)
+                        metrics_dict[algo] = lasso_regression_result
+                    elif algo == "Decision Tree":
+                        decision_tree_result = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter, average=average, multi_class=multi_class)
+                        metrics_dict[algo] = decision_tree_result
+                    elif algo == "Random Forest":
+                        random_forest_result = classifier_model.apply_decision_tree(model_name="Random Forest", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap, average=average, multi_class=multi_class)
+                        metrics_dict[algo] = random_forest_result
+                    elif algo == "XGBoost":
+                        xgboost_result = classifier_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta, average=average, multi_class=multi_class)
+                        metrics_dict[algo] =xgboost_result
+                    elif algo == "Support Vector Classification":
+                        svc_result = classifier_model.apply_svc(kernal=svc_kernal, degree=svc_degree, gamma=svc_gama, average=average, multi_class=multi_class)
+                        metrics_dict[algo] =svc_result
+                    elif algo == "Naive Bayes":
+                        naive_bayes_result = classifier_model.apply_naive_bayse(model_name="Naive Bayes", average=average, multi_class=multi_class)
+                        metrics_dict[algo] = naive_bayes_result
+                    elif algo == "AdaBoost":
+                        adaboost_result = classifier_model.apply_decision_tree_v2(model_name="AdaBoost", n_estimators=ada_boost_n_estimators, learning_rate=ada_boost_learning_rate, algorithm=ada_boost_algorithm, random_state=ada_boost_random_state, average=average, multi_class=multi_class)
+                        metrics_dict[algo] = adaboost_result
+                    elif algo == "Perceptron":
+                        perceptron_result = classifier_model.apply_perceptron(model_name="Perceptron", average=average, multi_class=multi_class)
+                        metrics_dict[algo] = perceptron_result
+                    elif algo == "Multi-Layer Perceptron":
+                        multi_layer_perceptron_result = classifier_model.apply_perceptron(model_name="Multi-Layer Perceptron", average=average, multi_class=multi_class)
+                        metrics_dict[algo] = multi_layer_perceptron_result
+                    elif algo == "K-Neighbors":
+                        K_Neighbors_result = classifier_model.appply_neighbors(model_name="K-Neighbors", average=average, multi_class=multi_class)
+                        metrics_dict[algo] = K_Neighbors_result
+
+                metrics_dataframe = classifier_model.apply_model(metrics_dict)
+                st.title("Classification Results: ")
+                st.dataframe(metrics_dataframe)
