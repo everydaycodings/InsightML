@@ -277,8 +277,8 @@ if file_upload is not None:
             is_multiclass = st.selectbox("Do you have mult-class Target: ", options=[True, False], index=1)
 
             if is_multiclass:
-                average = st.selectbox("Select your f1 score Average: ", options=["micro", "macro", "samples", "weighted", "binary", None], index=4)
-                multi_class = st.selectbox("Select your multi_class for ROC-AUC Score: ", options=["raise", "ovr", "ovo"], index=0)
+                average = st.selectbox("Select your f1 score Average: ", options=["micro", "macro", "samples", "weighted", "binary", None], index=3)
+                multi_class = st.selectbox("Select your multi_class for ROC-AUC Score: ", options=["raise", "ovr", "ovo"], index=1)
             
             else:
                 average = "binary"
@@ -296,39 +296,66 @@ if file_upload is not None:
                 for algo in classification_model_selected:
 
                     if algo == "Lasso Regression":
-                        lasso_regression_result = classifier_model.apply_linear(model_name="Logistic Regression", penalty=penalty, average=average, multi_class=multi_class)
+                        lasso_regression_result, lasso_ypred = classifier_model.apply_linear(model_name="Logistic Regression", penalty=penalty, average=average, multi_class=multi_class)
                         metrics_dict[algo] = lasso_regression_result
                     elif algo == "SGDClassifier":
-                        lasso_regression_result = classifier_model.apply_linear(model_name="SGDClassifier", penalty=penalty, average=average, multi_class=multi_class, loss=sgd_loss, alpha=sgd_alpha)
+                        lasso_regression_result, sgd_ypred = classifier_model.apply_linear(model_name="SGDClassifier", penalty=penalty, average=average, multi_class=multi_class, loss=sgd_loss, alpha=sgd_alpha)
                         metrics_dict[algo] = lasso_regression_result
                     elif algo == "Decision Tree":
-                        decision_tree_result = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter, average=average, multi_class=multi_class)
+                        decision_tree_result, dt_ypred = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter, average=average, multi_class=multi_class)
                         metrics_dict[algo] = decision_tree_result
                     elif algo == "Random Forest":
-                        random_forest_result = classifier_model.apply_decision_tree(model_name="Random Forest", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap, average=average, multi_class=multi_class)
+                        random_forest_result, rf_ypred  = classifier_model.apply_decision_tree(model_name="Random Forest", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, n_estimators=n_estimators, bootstrap=bootstrap, average=average, multi_class=multi_class)
                         metrics_dict[algo] = random_forest_result
                     elif algo == "XGBoost":
-                        xgboost_result = classifier_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta, average=average, multi_class=multi_class)
+                        xgboost_result, xg_ypred  = classifier_model.apply_decision_tree(model_name="XGBoost", n_estimators=n_estimators, max_depth=max_depth, eta=eta, average=average, multi_class=multi_class)
                         metrics_dict[algo] =xgboost_result
                     elif algo == "Support Vector Classification":
-                        svc_result = classifier_model.apply_svc(kernal=svc_kernal, degree=svc_degree, gamma=svc_gama, average=average, multi_class=multi_class)
+                        svc_result, svc_ypred  = classifier_model.apply_svc(kernal=svc_kernal, degree=svc_degree, gamma=svc_gama, average=average, multi_class=multi_class)
                         metrics_dict[algo] =svc_result
                     elif algo == "Naive Bayes":
-                        naive_bayes_result = classifier_model.apply_naive_bayse(model_name="Naive Bayes", average=average, multi_class=multi_class)
+                        naive_bayes_result, nb_ypred = classifier_model.apply_naive_bayse(model_name="Naive Bayes", average=average, multi_class=multi_class)
                         metrics_dict[algo] = naive_bayes_result
                     elif algo == "AdaBoost":
-                        adaboost_result = classifier_model.apply_decision_tree_v2(model_name="AdaBoost", n_estimators=ada_boost_n_estimators, learning_rate=ada_boost_learning_rate, algorithm=ada_boost_algorithm, random_state=ada_boost_random_state, average=average, multi_class=multi_class)
+                        adaboost_result, ad_ypred = classifier_model.apply_decision_tree_v2(model_name="AdaBoost", n_estimators=ada_boost_n_estimators, learning_rate=ada_boost_learning_rate, algorithm=ada_boost_algorithm, random_state=ada_boost_random_state, average=average, multi_class=multi_class)
                         metrics_dict[algo] = adaboost_result
                     elif algo == "Perceptron":
-                        perceptron_result = classifier_model.apply_perceptron(model_name="Perceptron", average=average, multi_class=multi_class)
+                        perceptron_result, p_ypred = classifier_model.apply_perceptron(model_name="Perceptron", average=average, multi_class=multi_class)
                         metrics_dict[algo] = perceptron_result
                     elif algo == "Multi-Layer Perceptron":
-                        multi_layer_perceptron_result = classifier_model.apply_perceptron(model_name="Multi-Layer Perceptron", average=average, multi_class=multi_class)
+                        multi_layer_perceptron_result, mlp_ypred = classifier_model.apply_perceptron(model_name="Multi-Layer Perceptron", average=average, multi_class=multi_class)
                         metrics_dict[algo] = multi_layer_perceptron_result
                     elif algo == "K-Neighbors":
-                        K_Neighbors_result = classifier_model.appply_neighbors(model_name="K-Neighbors", average=average, multi_class=multi_class)
+                        K_Neighbors_result, kn_ypred = classifier_model.appply_neighbors(model_name="K-Neighbors", average=average, multi_class=multi_class)
                         metrics_dict[algo] = K_Neighbors_result
+                
 
                 metrics_dataframe = classifier_model.apply_model(metrics_dict)
                 st.title("Classification Results: ")
                 st.dataframe(metrics_dataframe)
+                
+                st.title("Plot Evaluation Metrics")
+                for algo in classification_model_selected:
+
+                    if algo == "Lasso Regression":
+                        classifier_model.plot_evaluation_metrics(lasso_ypred, algo)
+                    if algo == "SGDClassifier":
+                        classifier_model.plot_evaluation_metrics(sgd_ypred, algo)
+                    if algo == "Decision Tree":
+                        classifier_model.plot_evaluation_metrics(dt_ypred, algo)
+                    if algo == "Random Forest":
+                        classifier_model.plot_evaluation_metrics(rf_ypred, algo)
+                    if algo == "XGBoost":
+                        classifier_model.plot_evaluation_metrics(xg_ypred, algo)
+                    if algo == "Support Vector Classification":
+                        classifier_model.plot_evaluation_metrics(svc_ypred, algo)
+                    if algo == "Naive Bayes":
+                        classifier_model.plot_evaluation_metrics(nb_ypred, algo)
+                    if algo == "AdaBoost":
+                        classifier_model.plot_evaluation_metrics(ad_ypred, algo)
+                    if algo == "Perceptron":
+                        classifier_model.plot_evaluation_metrics(p_ypred, algo)
+                    if algo == "Multi-Layer Perceptron":
+                        classifier_model.plot_evaluation_metrics(mlp_ypred, algo)
+                    if algo == "K-Neighbors":
+                        classifier_model.plot_evaluation_metrics(kn_ypred, algo)

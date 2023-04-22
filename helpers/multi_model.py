@@ -11,10 +11,14 @@ from sklearn.tree import DecisionTreeRegressor, DecisionTreeClassifier
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, AdaBoostClassifier
 from sklearn.svm import SVR, SVC
 from xgboost import XGBRegressor, XGBClassifier
-from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, ConfusionMatrixDisplay, confusion_matrix, RocCurveDisplay, PrecisionRecallDisplay, precision_recall_curve
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score, roc_auc_score, classification_report
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
+import scikitplot as skplt
+import matplotlib.pyplot as plt
+import tempfile
+import os
 
 round_off_limit = 4
 
@@ -158,6 +162,22 @@ class ClassifierHandler:
 
         return metrics_dict
     
+    def plot_evaluation_metrics(self, y_pred, algo):
+
+        st.subheader("Evaluation Plot for {}".format(algo))
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skplt.metrics.plot_confusion_matrix(self.y_test, y_pred, normalize=False, title = 'Confusion Matrix for {}'.format(algo))
+            img_path = os.path.join(temp_dir, "img.png")
+            plt.savefig(img_path)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                st.image(img_path)
+            with col2:
+                report =  classification_report(self.y_test, y_pred)
+                st.text(f'<pre>{report}</pre>')
+        
+    
     
     def apply_linear(self, model_name, penalty, average, multi_class, loss=None, alpha=None):
 
@@ -171,7 +191,8 @@ class ClassifierHandler:
 
         metrics = self.evaluation_metrics(y_pred, average, multi_class)
 
-        return metrics
+        return metrics, y_pred
+
 
     def apply_decision_tree(self, model_name, criterion=None,  max_depth=None, min_samples_split=None, min_samples_leaf=None, max_features=None, max_leaf_nodes=None, min_impurity_decrease=None, splitter=None, n_estimators=None, bootstrap=None, eta=None, average=None, multi_class=None):
 
@@ -187,8 +208,9 @@ class ClassifierHandler:
 
         metrics = self.evaluation_metrics(y_pred, average, multi_class)
 
-        return metrics
+        return metrics, y_pred
     
+
     def apply_decision_tree_v2(self, model_name, n_estimators, learning_rate, algorithm, random_state, average, multi_class):
 
         if model_name == "AdaBoost":
@@ -199,7 +221,7 @@ class ClassifierHandler:
 
         metrics = self.evaluation_metrics(y_pred, average, multi_class)
 
-        return metrics
+        return metrics, y_pred
 
 
     def apply_svc(self, kernal, degree, gamma, average, multi_class):
@@ -211,7 +233,7 @@ class ClassifierHandler:
 
         metrics = self.evaluation_metrics(y_pred, average, multi_class)
         
-        return metrics
+        return metrics, y_pred
 
     def apply_naive_bayse(self, model_name, average, multi_class):
 
@@ -222,7 +244,8 @@ class ClassifierHandler:
         y_pred = clf.predict(self.X_test)
         metrics = self.evaluation_metrics(y_pred, average, multi_class)
         
-        return metrics
+        return metrics, y_pred
+
 
     def apply_perceptron(self, model_name, average, multi_class):
 
@@ -234,7 +257,8 @@ class ClassifierHandler:
         y_pred = clf.predict(self.X_test)
         metrics = self.evaluation_metrics(y_pred, average, multi_class)
         
-        return metrics
+        return metrics, y_pred
+
 
     def appply_neighbors(self, model_name, average, multi_class):
 
@@ -245,7 +269,8 @@ class ClassifierHandler:
         y_pred = clf.predict(self.X_test)
         metrics = self.evaluation_metrics(y_pred, average, multi_class)
         
-        return metrics
+        return metrics, y_pred
+
 
     def apply_model(self, metrics_dict):
 
