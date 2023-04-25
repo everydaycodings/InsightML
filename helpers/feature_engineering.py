@@ -86,7 +86,7 @@ class RemoveMissingValues:
                 data[col] = data[col].fillna(mean_data)
                 data_dict[col] = mean_data
 
-            st.text("All the null values in the columns {} has been replace by the Mean values")
+            st.success("All the null values in the columns {} has been replace by the Mean values")
             st.code(data_dict)
             
         if method_type == "Median":
@@ -95,13 +95,25 @@ class RemoveMissingValues:
                 data[col] = data[col].fillna(median_data)
                 data_dict[col] = median_data
 
-            st.text("All the null values in the columns has been replace by the Median values")
+            st.success("All the null values in the columns has been replace by the Median values")
             st.code(data_dict)
 
         DataManagment().update_data(raw_data=data)
     
+
     def drop_nan_value(self,data):
 
         data = data.dropna()
-        st.text("Removed all the NaN value")
+        st.suc("Removed all the NaN value")
         DataManagment().update_data(raw_data=data)
+    
+    def random_imputed_value(self, data, selected_column):
+
+        for col in selected_column:
+            data[col] = data[col]
+            data[col][data[col].isnull()] = data[col].dropna().sample(data[col].isnull().sum()).values
+
+        DataManagment().update_data(raw_data=data)
+        st.success("Replaced all the NaN values with random Imputed values")
+
+        

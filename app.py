@@ -392,7 +392,7 @@ if file_upload is not None:
 
             if missing_value_type == "Handle Numerical Missing Value":
                 
-                method_Select = st.selectbox("Select the method you want to apply: ", options=["Drop Missing Value", "Replace Misssing Value with Mean", "Replace Misssing Value with Median"])
+                method_Select = st.selectbox("Select the method you want to apply: ", options=["Drop Missing Value", "Replace Missing Value with Mean", "Replace Missing Value with Median", "Replace Missing value with random Imputed Values"])
 
                 if method_Select == "Drop Missing Value":
                     if st.button("Apply Changes"):
@@ -416,6 +416,14 @@ if file_upload is not None:
                     if st.button("Apply Changes"):
                         missing_value.remove_num_values_using_mean_median(data=data, method_type="Median", selected_column=selected_column)
 
+
+                if method_Select == "Replace Missing value with random Imputed Values":
+
+                    data = managment.load_data(raw_data=data)
+                    num_category = [feature for feature in data.columns if data[feature].dtypes != "O"]
+                    selected_column = st.multiselect("Select the column: ", options=num_category)
+                    if st.button("Apply Changes"):
+                        missing_value.random_imputed_value(data, selected_column)
 
         managment.download_csv()
 
