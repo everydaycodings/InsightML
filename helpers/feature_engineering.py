@@ -67,3 +67,35 @@ class DropColumns:
 
         st.text("Dataset Top View")
         st.dataframe(data.head())
+
+
+
+class RemoveMissingValues:
+
+    def __init__(self) -> None:
+        pass
+
+    
+    def remove_num_values_using_mean_median(self, data, selected_column, method_type):
+
+        data_dict = {}
+
+        if method_type == "Mean":
+            for col in selected_column:
+                mean_data = data[col].mean()
+                data[col] = data[col].fillna(mean_data)
+                data_dict[col] = mean_data
+
+            st.text("All the null values in the columns {} has been replace by the Mean values")
+            st.code(data_dict)
+            
+        if method_type == "Median":
+            for col in selected_column:
+                median_data = data[col].median()
+                data[col] = data[col].fillna(median_data)
+                data_dict[col] = median_data
+
+            st.text("All the null values in the columns has been replace by the Median values")
+            st.code(data_dict)
+
+        DataManagment().update_data(raw_data=data)

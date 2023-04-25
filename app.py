@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from helpers.utils import Utils
 from helpers.apply_model import RegressionHandler, ClassifierHandler
-from helpers.feature_engineering import DataManagment, DropColumns
+from helpers.feature_engineering import DataManagment, DropColumns, RemoveMissingValues
 
 models_list = ["Linear Regression", "Logistic Regression", "Decision Tree Regression", "Decision Tree Classifier"]
 linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "Cross Validated R2"]
@@ -373,16 +373,46 @@ if file_upload is not None:
     if work_type == "Feature Engineering":
         
         managment = DataManagment()
-        feature_engineering_type = st.sidebar.selectbox("Select your Feature Engineering Type: ", options=["Remove Column", "Remove Missing Values"])
+        feature_engineering_type = st.sidebar.selectbox("Select your Feature Engineering Type: ", options=["Drop Columns", "Handle Missing Values"])
 
-        if feature_engineering_type == "Remove Column":
-            st.text(file_upload)
-            st.title("Remove Column")
+        if feature_engineering_type == "Drop Columns":
+            st.title("Drop Column")
             data = managment.load_data(raw_data=data)
             select_column = st.multiselect("Select Your Column To Be Droped: ", options=data.columns)
             
             if st.button("Apply Changes"):
                 DropColumns().remove_column(data=data, selected_columns=select_column)
+        
+        if feature_engineering_type == "Handle Missing Values":
+            
+            missing_value = RemoveMissingValues()
+
+            st.title("Handle Missing Values")
+            missing_value_type = st.selectbox("Choose Your Missing Value Type: ", options=["Handle Numerical Missing Value", "Handle Categorical Missing Value"])
+
+            if missing_value_type == "Handle Numerical Missing Value":
+                
+                method_Select = st.selectbox("Select the method you want to apply: ", options=["Remove Missing Value", "Replace Misssing Value with Mean", "Replace Misssing Value with Median"])
+
+                if method_Select == "Replace Misssing Value with Mean":
+
+                    data = managment.load_data(raw_data=data)
+                    num_category = [feature for feature in data.columns if data[feature].dtypes != "O"]
+                    selected_column = st.multiselect("Select the column: ", options=num_category)
+                    
+                    if st.button("Apply Changes"):
+                        missing_value.remove_num_values_using_mean_median(data=data, method_type="Mean", selected_column=selected_column)
+                
+                if method_Select == "Replace Misssing Value with Median":
+
+                    data = managment.load_data(raw_data=data)
+                    num_category = [feature for feature in data.columns if data[feature].dtypes != "O"]
+                    selected_column = st.multiselect("Select the column: ", options=num_category)
+                    
+                    if st.button("Apply Changes"):
+                        missing_value.remove_num_values_using_mean_median(data=data, method_type="Median", selected_column=selected_column)
+
+
         managment.download_csv()
 
 
