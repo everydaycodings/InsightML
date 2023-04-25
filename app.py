@@ -398,7 +398,7 @@ if file_upload is not None:
                     if st.button("Apply Changes"):
                         missing_value.drop_nan_value(managment.load_data(raw_data=data))
 
-                if method_Select == "Replace Misssing Value with Mean":
+                if method_Select == "Replace Missing Value with Mean":
 
                     data = managment.load_data(raw_data=data)
                     num_category = [feature for feature in data.columns if data[feature].dtypes != "O"]
@@ -407,7 +407,7 @@ if file_upload is not None:
                     if st.button("Apply Changes"):
                         missing_value.remove_num_values_using_mean_median(data=data, method_type="Mean", selected_column=selected_column)
                 
-                if method_Select == "Replace Misssing Value with Median":
+                if method_Select == "Replace Missing Value with Median":
 
                     data = managment.load_data(raw_data=data)
                     num_category = [feature for feature in data.columns if data[feature].dtypes != "O"]
