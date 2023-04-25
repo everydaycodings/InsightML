@@ -392,7 +392,11 @@ if file_upload is not None:
 
             if missing_value_type == "Handle Numerical Missing Value":
                 
-                method_Select = st.selectbox("Select the method you want to apply: ", options=["Remove Missing Value", "Replace Misssing Value with Mean", "Replace Misssing Value with Median"])
+                method_Select = st.selectbox("Select the method you want to apply: ", options=["Drop Missing Value", "Replace Misssing Value with Mean", "Replace Misssing Value with Median"])
+
+                if method_Select == "Drop Missing Value":
+                    if st.button("Apply Changes"):
+                        missing_value.drop_nan_value(managment.load_data(raw_data=data))
 
                 if method_Select == "Replace Misssing Value with Mean":
 

@@ -99,3 +99,9 @@ class RemoveMissingValues:
             st.code(data_dict)
 
         DataManagment().update_data(raw_data=data)
+    
+    def drop_nan_value(self,data):
+
+        data = data.dropna()
+        st.text("Removed all the NaN value")
+        DataManagment().update_data(raw_data=data)
