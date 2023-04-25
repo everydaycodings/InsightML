@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
 from helpers.utils import Utils
-from helpers.single_model import ApplyLinearRegression, ApplyLogisticRegression, ApplyDecisionTreeRegressor, ApplyDecisionTreeClassifier
-from helpers.multi_model import RegressionHandler, ClassifierHandler
+from helpers.apply_model import RegressionHandler, ClassifierHandler
 
 
 models_list = ["Linear Regression", "Logistic Regression", "Decision Tree Regression", "Decision Tree Classifier"]
@@ -103,7 +102,14 @@ if file_upload is not None:
         test_size_selector = st.slider("Select your Test Size: ", min_value=1, max_value=100, value=42, step=1)
         test_size_value = test_size_selector/100
         st.text("Your Test Size is: {}".format(test_size_value))
-        X_train, X_test, y_train, y_test = Utils().train_test_split(x, y, float(test_size_value))
+
+        is_random = st.selectbox("Do you want to set Random state for Train-Test-Split?", options=["No", "Yes"], index=0)
+        if is_random == "Yes":
+            is_random_num = st.number_input("Select your Random State for Train-Test-Split: ", min_value=0, step=1)
+        else:
+            is_random_num = None
+
+        X_train, X_test, y_train, y_test = Utils().train_test_split(x, y, float(test_size_value), random_state=is_random_num)
 
 
         
