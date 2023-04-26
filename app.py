@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from helpers.utils import Utils
 from helpers.apply_model import RegressionHandler, ClassifierHandler
-from helpers.feature_engineering import DataManagment, DropColumns, RemoveMissingValues
+from helpers.feature_engineering import DataManagment, DropColumns, RemoveMissingValues, RemoveCategoricalValues
 
 models_list = ["Linear Regression", "Logistic Regression", "Decision Tree Regression", "Decision Tree Classifier"]
 linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "Cross Validated R2"]
@@ -424,7 +424,35 @@ if file_upload is not None:
                     selected_column = st.multiselect("Select the column: ", options=num_category)
                     if st.button("Apply Changes"):
                         missing_value.random_imputed_value(data, selected_column)
+            
+        
+        
+            if missing_value_type == "Handle Categorical Missing Value":
+        
+                method_Select = st.selectbox("Select the method you want to apply: ", options=["Drop Missing Value", "Replace Missing value with random Imputed Values", "Replace missing value to custom value"])
 
+                remove_cat_values = RemoveCategoricalValues()
+
+                if method_Select == "Drop Missing Value":
+                    if st.button("Apply Changes"):
+                        remove_cat_values.drop_nan_value(managment.load_data(raw_data=data))
+                
+                if method_Select == "Replace Missing value with random Imputed Values":
+                    data = managment.load_data(raw_data=data)
+                    cat_category = [feature for feature in data.columns if data[feature].dtypes == "O"]
+                    selected_column = st.multiselect("Select the column: ", options=cat_category)
+                    if st.button("Apply Changes"):
+                        remove_cat_values.random_imputed_value(data, selected_column)
+                
+                if method_Select == "Replace missing value to custom value":
+                    data = managment.load_data(raw_data=data)
+                    cat_category = [feature for feature in data.columns if data[feature].dtypes == "O"]
+                    selected_column = st.multiselect("Select the column: ", options=cat_category)
+                    rword = st.text_input("Enter the word you want to replace NaN values with: ", placeholder="Missing")
+                    if st.button("Apply Changes"):
+                        remove_cat_values.impute_custom_values(data, selected_column, rword)
+        
+        
         managment.download_csv()
 
 

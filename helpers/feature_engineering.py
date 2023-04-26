@@ -116,4 +116,38 @@ class RemoveMissingValues:
         DataManagment().update_data(raw_data=data)
         st.success("Replaced all the NaN values with random Imputed values")
 
+
+
+class RemoveCategoricalValues:
+
+    def __init__(self) -> None:
+        pass
+
+    
+    def drop_nan_value(self,data):
+
+        data = data.dropna()
+        st.success("Removed all the NaN value")
+        DataManagment().update_data(raw_data=data)
+    
+
+    def random_imputed_value(self, data, selected_column):
         
+        data_dict = {}
+
+        for col in selected_column:
+            column_mode = data[col].mode().values[0]
+            data[col] = data[col].fillna(column_mode)
+            data_dict[col] = column_mode
+
+        DataManagment().update_data(raw_data=data)
+        st.success("Replaced all the NaN values with random Imputed values")
+        st.code(data_dict)
+    
+    def impute_custom_values(Self, data, selected_column, rword):
+
+        for col in selected_column:
+            data[col] =  data[col].fillna(rword)
+        
+        DataManagment().update_data(raw_data=data)
+        st.success("Replaced all the NaN values with {} values".format(rword))
