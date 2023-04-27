@@ -151,3 +151,31 @@ class RemoveCategoricalValues:
         
         DataManagment().update_data(raw_data=data)
         st.success("Replaced all the NaN values with {} values".format(rword))
+    
+
+
+class HandleOutliers:
+
+    def __init__(self) -> None:
+        pass
+
+    def handle_outliers(self, data, selected_column):
+        
+        data_dict = {}
+
+        for col in selected_column:
+
+            lower_percentile = data[col].quantile(0.25)
+            upper_percentile = data[col].quantile(0.75)
+
+            iqr = upper_percentile - lower_percentile
+
+            upper_limit = upper_percentile + 1.5 * iqr
+            lower_limit = lower_percentile - 1.5 * iqr
+
+            data[col] = data.loc[(data[col] < upper_limit) & (data[col] > lower_limit), col]
+            data_dict[col] = "Lower Limit: {}, Upper Limit: {}".format(lower_limit, upper_limit)
+
+        DataManagment().update_data(raw_data=data)
+        st.success("Trimmed all the Outliers")
+        st.code(data_dict)

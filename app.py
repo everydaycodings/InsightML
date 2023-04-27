@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from helpers.utils import Utils
 from helpers.apply_model import RegressionHandler, ClassifierHandler
-from helpers.feature_engineering import DataManagment, DropColumns, RemoveMissingValues, RemoveCategoricalValues
+from helpers.feature_engineering import DataManagment, DropColumns, RemoveMissingValues, RemoveCategoricalValues, HandleOutliers
 
 models_list = ["Linear Regression", "Logistic Regression", "Decision Tree Regression", "Decision Tree Classifier"]
 linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "Cross Validated R2"]
@@ -373,7 +373,7 @@ if file_upload is not None:
     if work_type == "Feature Engineering":
         
         managment = DataManagment()
-        feature_engineering_type = st.sidebar.selectbox("Select your Feature Engineering Type: ", options=["Drop Columns", "Handle Missing Values"])
+        feature_engineering_type = st.sidebar.selectbox("Select your Feature Engineering Type: ", options=["Drop Columns", "Handle Missing Values", "Removing Outliers"])
 
         if feature_engineering_type == "Drop Columns":
             st.title("Drop Column")
@@ -451,8 +451,17 @@ if file_upload is not None:
                     rword = st.text_input("Enter the word you want to replace NaN values with: ", placeholder="Missing")
                     if st.button("Apply Changes"):
                         remove_cat_values.impute_custom_values(data, selected_column, rword)
-        
-        
+
+
+        if feature_engineering_type == "Removing Outliers":
+            st.title("Remove Outliers")
+            data = managment.load_data(raw_data=data)
+            num_category = [feature for feature in data.columns if data[feature].dtypes != "O"]
+            selected_column = st.multiselect("Select the column: ", options=num_category)
+            if st.button("Apply Changes"):
+                HandleOutliers().handle_outliers(data, selected_column)
+
+                
         managment.download_csv()
 
 
