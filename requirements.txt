@@ -4,4 +4,4 @@ matplotlib
 streamlit
 seaborn
 xgboost
-scikitplot
+scikit-plot
