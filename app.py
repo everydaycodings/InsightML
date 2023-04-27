@@ -4,6 +4,13 @@ from helpers.utils import Utils
 from helpers.apply_model import RegressionHandler, ClassifierHandler
 
 
+st.set_page_config(
+     page_title="InsightML",
+     page_icon="🧊",
+     layout="wide",
+)
+
+
 models_list = ["Linear Regression", "Logistic Regression", "Decision Tree Regression", "Decision Tree Classifier"]
 linear_regression_model_metrics = ["MAE", "MSE", "RMSE", "R2", "Adjusted R2", "Cross Validated R2"]
 logistic_regression_model_metrics = ["Confusion Metrics", "ROC Curve", "Precision Recall Curve"]
