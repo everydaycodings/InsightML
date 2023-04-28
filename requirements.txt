@@ -5,3 +5,4 @@ streamlit
 seaborn
 xgboost
 scikit-plot
+tensorflow-cpu

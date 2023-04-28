@@ -124,12 +124,15 @@ if file_upload is not None:
         
     if problem_selector == "Regression Problem":
 
-        with st.sidebar.expander("Selet Your Models"):
+        with st.sidebar.expander("Select Your ML Models"):
 
             regression_model_selected =st.multiselect("Select Your Regression Models: ", options=regression_multi_model_problem, default=regression_multi_model_problem)
         
+        with st.sidebar.expander("Select Your DL Models"):
+            regression_dl_model_selected = st.multiselect("Select Your Model: ", options=["ANN"], default=["ANN"])
 
-        with st.sidebar.expander("Hyperparameters"):
+        
+        with st.sidebar.expander("ML Hyperparameters"):
 
             if "Ridge Regression" in regression_model_selected or "Lasso Regression" in regression_model_selected or "ElasticNet Regression" in regression_model_selected:
                 apha_value_selector = st.number_input("Enter Your Alpha Value (lasso, ridge, elastic): ", min_value=0.0, value=1.0)
@@ -178,14 +181,31 @@ if file_upload is not None:
 
                 if max_leaf_nodes == 0:
                     max_leaf_nodes = None
+        
 
-            
+        if len(regression_dl_model_selected) != 0:
+
+            with st.sidebar.expander("DL Hyperparameters"):
+                
+                dl_layers = st.number_input("Number of layers for your Deep Learning Model: ", min_value=0, step=1, value=3)
+                dl_units = st.number_input("Number of units for each layer: ", min_value=0, step=1, value=3)
+                dl_base_activation = st.selectbox("Select the Base Activation for Deep Learning Model: ", options=["relu", "sigmoid", "softmax", "softplus", "softsign", "tanh", "selu", "elu", "exponential"], index=0)
+                dl_last_activation = st.selectbox("Select the Last Activation for Deep Learning Model: ", options=["linear"], index=0)
+                dl_drouprout_rate = st.slider("Select your Droupout Rate: ", min_value=0, max_value=100, step=1, value=0)
+                dl_drouprout_rate = (dl_drouprout_rate/100)
+                st.text("Droupout Layer Percentage: {}%".format(dl_drouprout_rate))
+                dl_loss_func = st.selectbox("Select the Loss Function: ", options=["mean_squared_error", "mean_absolute_error", "mean_absolute_percentage_error", "mean_squared_logarithmic_error", "cosine_similarity"], index=0)
+                dl_optimizer = st.selectbox("Select the Optimizer Function: ", options=["adam"], index=0)
+                dl_epochs = st.number_input("Select the number of Epochs: ", min_value=1, value=10, step=1)
+        
+        
         if st.sidebar.button("Evaluate"):
 
             with st.spinner("Evaluating Model..."):
                 regression_model = RegressionHandler(X_train, X_test, y_train, y_test)
 
                 metrics_dict = {}
+                ann_metrics_dict = {}
 
                 for algo in regression_model_selected:
                     if algo == "Linear Regression":
@@ -217,11 +237,28 @@ if file_upload is not None:
                     if algo == "Polynomial Regression":
                         polynomial_regression_result = regression_model.apply_linear_regression(model_name="Polynomial Regression", degree=poly_degree)
                         metrics_dict[algo] = polynomial_regression_result
-
+                
 
                 metrics_dataframe = regression_model.apply_model(metrics_dict)
                 st.title("Regression Results: ")
                 st.dataframe(metrics_dataframe)
+
+                with st.spinner("Evaluating ANN Model..."):
+
+                    if "ANN" in regression_dl_model_selected:
+                        ann_result, dl_summary = regression_model.apply_dl_model(layers=dl_layers, base_activation=dl_base_activation, last_activation=dl_last_activation, loss=dl_loss_func, optimizer=dl_optimizer, epochs=dl_epochs, dropout_rate=dl_drouprout_rate, units=dl_units)
+                        ann_metrics_dict["ANN"] = polynomial_regression_result
+                
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.subheader("ANN Model Summery")
+                            dl_summary.summary(print_fn=lambda x: st.text(x))
+                        with col2:
+                            st.subheader("ANN Model Performance")
+                            ann_metrics_dataframe = regression_model.apply_model(ann_metrics_dict)
+                            st.dataframe(ann_metrics_dict)
+
+
     
     
     

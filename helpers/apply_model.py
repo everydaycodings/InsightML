@@ -19,6 +19,9 @@ import scikitplot as skplt
 import matplotlib.pyplot as plt
 import tempfile
 import os
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+
 
 round_off_limit = 4
 
@@ -32,19 +35,43 @@ class RegressionHandler:
         self.y_test = y_test
      
     def Evaluation_Metrics(self, model, y_pred):
+        
+        try:
+            cv_score = cross_val_score(estimator = model, X = self.X_train, y = self.y_train, cv = 10)
+        except:
+            cv_score = "Not Selected"
+        
+        try:
+            mae = round(metrics.mean_absolute_error(self.y_test, y_pred), round_off_limit)
+        except:
+            mae = "Not Selected"
+        try:
+            mse = round(metrics.mean_squared_error(self.y_test, y_pred), round_off_limit)
+        except:
+            mse = "Not Selected"
+        try:
+            r2 = round(model.score(self.X_test, self.y_test), round_off_limit)
+        except:
+            r2 = "Not Selected"
+        try:
+            r2_ = model.score(self.X_test, self.y_test)
+        except:
+            r2_ = "Not Selected"
+        try:
+            n = self.X_test.shape[0]
+            p = self.X_test.shape[1]
+            adjusted_r2 = round(1-(1-r2_)*(n-1)/(n-p-1), round_off_limit)
+        except:
+            adjusted_r2 = "Not Selected"
+        try:
+            RMSE = round(np.sqrt(mse), round_off_limit)
+        except:
+            RMSE = "Not Selected"
+        try:
+            CV_R2 = round(cv_score.mean(), round_off_limit)
+        except:
+            CV_R2 = "Not Selected"
 
-        cv_score = cross_val_score(estimator = model, X = self.X_train, y = self.y_train, cv = 10)
-        
-        mae = round(metrics.mean_absolute_error(self.y_test, y_pred), round_off_limit)
-        mse = round(metrics.mean_squared_error(self.y_test, y_pred), round_off_limit)
-        r2 = round(model.score(self.X_test, self.y_test), round_off_limit)
-        
-        r2_ = model.score(self.X_test, self.y_test)
-        n = self.X_test.shape[0]
-        p = self.X_test.shape[1]
-        adjusted_r2 = round(1-(1-r2_)*(n-1)/(n-p-1), round_off_limit)
-        RMSE = round(np.sqrt(mse), round_off_limit)
-        CV_R2 = round(cv_score.mean(), round_off_limit)
         metrics_dict = {
             "MAE": mae,
             "MSE": mse,
@@ -108,6 +135,37 @@ class RegressionHandler:
         
         return metrics
 
+
+    def create_dl_model(self, layers, base_activation, last_activation, dropout_rate=0.0, units=11):
+        
+        model = Sequential()
+        
+        # Add the input layer
+        model.add(Dense(units, activation=base_activation, input_dim=self.X_train.shape[1]))
+        
+        # Add the hidden layers
+        for i in range(layers-1):
+            model.add(Dense(units, activation=base_activation))
+            if dropout_rate > 0:
+                model.add(Dropout(dropout_rate))
+        
+        # Add the output layer
+        model.add(Dense(1, activation=last_activation))
+        
+        return model
+    
+
+    def apply_dl_model(self, layers, base_activation, last_activation, loss, optimizer, epochs, dropout_rate=0.0, units=11):
+        
+        model = self.create_dl_model(layers, base_activation, last_activation, dropout_rate, units)
+        model.compile(loss=loss, optimizer=optimizer)
+        history = model.fit(self.X_train, self.y_train, epochs=epochs, validation_split=0.2)
+
+        y_pred = model.predict(self.X_test)
+
+        metrics = self.Evaluation_Metrics(model, y_pred)
+        
+        return metrics, model
 
 
     def apply_model(self, metrics_dict):
