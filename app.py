@@ -18,7 +18,7 @@ problem_selector_options = ["Regression Problem", "Classifier Problem"]
 
 regression_multi_model_problem = ["Linear Regression", "Ridge Regression", "Lasso Regression", "ElasticNet Regression", "Polynomial Regression",
                                   "Decision Tree", "Random Forest", "XGBoost",
-                                  "Support Vector Regression", 
+                                  "Support Vector Regression", "ANN"
                                   ]
 
 classifier_multi_model_problem = ["Lasso Regression","SGDClassifier",
@@ -126,10 +126,7 @@ if file_upload is not None:
 
         with st.sidebar.expander("Select Your ML Models"):
 
-            regression_model_selected =st.multiselect("Select Your Regression Models: ", options=regression_multi_model_problem, default=regression_multi_model_problem)
-        
-        with st.sidebar.expander("Select Your DL Models"):
-            regression_dl_model_selected = st.multiselect("Select Your Model: ", options=["ANN"], default=["ANN"])
+            regression_model_selected =st.multiselect("Select Your Regression Models: ", options=regression_multi_model_problem, default=[model for model in regression_multi_model_problem if model != "ANN"])
 
         
         with st.sidebar.expander("ML Hyperparameters"):
@@ -183,7 +180,7 @@ if file_upload is not None:
                     max_leaf_nodes = None
         
 
-        if len(regression_dl_model_selected) != 0:
+        if "ANN" in regression_model_selected:
 
             with st.sidebar.expander("DL Hyperparameters"):
                 
@@ -245,7 +242,7 @@ if file_upload is not None:
 
                 with st.spinner("Evaluating ANN Model..."):
 
-                    if "ANN" in regression_dl_model_selected:
+                    if "ANN" in regression_model_selected:
                         ann_result, dl_summary = regression_model.apply_dl_model(layers=dl_layers, base_activation=dl_base_activation, last_activation=dl_last_activation, loss=dl_loss_func, optimizer=dl_optimizer, epochs=dl_epochs, dropout_rate=dl_drouprout_rate, units=dl_units)
                         ann_metrics_dict["ANN"] = polynomial_regression_result
                 
