@@ -27,7 +27,8 @@ classifier_multi_model_problem = ["Lasso Regression","SGDClassifier",
                                    "K-Neighbors",
                                    "Support Vector Classification",
                                    "Naive Bayes",
-                                   "Perceptron", "Multi-Layer Perceptron"
+                                   "Perceptron", "Multi-Layer Perceptron",
+                                   "ANN"
                                 ]
 
 
@@ -244,7 +245,7 @@ if file_upload is not None:
 
                     if "ANN" in regression_model_selected:
                         ann_result, dl_summary = regression_model.apply_dl_model(layers=dl_layers, base_activation=dl_base_activation, last_activation=dl_last_activation, loss=dl_loss_func, optimizer=dl_optimizer, epochs=dl_epochs, dropout_rate=dl_drouprout_rate, units=dl_units)
-                        ann_metrics_dict["ANN"] = polynomial_regression_result
+                        ann_metrics_dict["ANN"] = ann_result
                 
                         col1, col2 = st.columns(2)
                         with col1:
@@ -265,7 +266,7 @@ if file_upload is not None:
 
             classification_model_selected =st.multiselect("Select Your Classification Models: ", options=classifier_multi_model_problem, default=classifier_multi_model_problem)
             
-        with st.sidebar.expander("Hyperparameters"):
+        with st.sidebar.expander("ML Hyperparameters"):
 
             if "Lasso Regression" in classification_model_selected or "SGDClassifier" in classification_model_selected:
                 penalty = st.selectbox("Select the penalty: ", options=["l1", "l2", "elasticnet", None], index=1)
@@ -321,6 +322,24 @@ if file_upload is not None:
                 if max_leaf_nodes == 0:
                     max_leaf_nodes = None
 
+
+        if "ANN" in classification_model_selected:
+
+            with st.sidebar.expander("DL Hyperparameters"):
+                classification_type = st.selectbox("Which kinf of classificatioin is this: ", options=["Binary", "Multi-Class"], index=0)
+                dl_layers = st.number_input("Number of layers for your Deep Learning Model: ", min_value=0, step=1, value=3)
+                dl_units = st.number_input("Number of units for each layer: ", min_value=0, step=1, value=3)
+                dl_base_activation = st.selectbox("Select the Base Activation for Deep Learning Model: ", options=["relu", "sigmoid", "softmax", "softplus", "softsign", "tanh", "selu", "elu", "exponential"], index=0)
+                dl_last_activation = st.selectbox("Select the Last Activation for Deep Learning Model: ", options=["sigmoid"], index=0)
+                dl_drouprout_rate = st.slider("Select your Droupout Rate: ", min_value=0, max_value=100, step=1, value=0)
+                dl_drouprout_rate = (dl_drouprout_rate/100)
+                st.text("Droupout Layer Percentage: {}%".format(dl_drouprout_rate))
+                if classification_type == "Binary":
+                    dl_loss_func = st.selectbox("Select the Loss Function: ", options=["binary_crossentropy"], index=0)
+                else:
+                    dl_loss_func = st.selectbox("Select the Loss Function: ", options=["categorical_crossentropy"], index=0)
+                dl_optimizer = st.selectbox("Select the Optimizer Function: ", options=["adam"], index=0)
+                dl_epochs = st.number_input("Select the number of Epochs: ", min_value=1, value=10, step=1)
         
         with st.sidebar.expander("Evaluation Metrics Hyperparameters"):
             is_multiclass = st.selectbox("Do you have mult-class Target: ", options=[True, False], index=1)
@@ -341,6 +360,7 @@ if file_upload is not None:
                 classifier_model = ClassifierHandler(X_train, X_test, y_train, y_test)
 
                 metrics_dict = {}
+                ann_metrics_dict = {}
 
                 for algo in classification_model_selected:
 
@@ -348,8 +368,8 @@ if file_upload is not None:
                         lasso_regression_result, lasso_ypred = classifier_model.apply_linear(model_name="Logistic Regression", penalty=penalty, average=average, multi_class=multi_class)
                         metrics_dict[algo] = lasso_regression_result
                     elif algo == "SGDClassifier":
-                        lasso_regression_result, sgd_ypred = classifier_model.apply_linear(model_name="SGDClassifier", penalty=penalty, average=average, multi_class=multi_class, loss=sgd_loss, alpha=sgd_alpha)
-                        metrics_dict[algo] = lasso_regression_result
+                        sgd_result, sgd_ypred = classifier_model.apply_linear(model_name="SGDClassifier", penalty=penalty, average=average, multi_class=multi_class, loss=sgd_loss, alpha=sgd_alpha)
+                        metrics_dict[algo] = sgd_result
                     elif algo == "Decision Tree":
                         decision_tree_result, dt_ypred = classifier_model.apply_decision_tree(model_name="Decision Tree", criterion=criterion, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features, max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease, splitter=splitter, average=average, multi_class=multi_class)
                         metrics_dict[algo] = decision_tree_result
@@ -382,7 +402,22 @@ if file_upload is not None:
                 metrics_dataframe = classifier_model.apply_model(metrics_dict)
                 st.title("Classification Results: ")
                 st.dataframe(metrics_dataframe)
+
+                with st.spinner("Evaluating ANN Model..."):
+
+                    if "ANN" in classification_model_selected:
+                        ann_result, dl_summary = classifier_model.apply_dl_model(layers=dl_layers, base_activation=dl_base_activation, last_activation=dl_last_activation, loss=dl_loss_func, optimizer=dl_optimizer, epochs=dl_epochs, dropout_rate=dl_drouprout_rate, units=dl_units, average=average, multi_class=multi_class)
+                        ann_metrics_dict["ANN"] = ann_result
                 
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.subheader("ANN Model Summery")
+                            dl_summary.summary(print_fn=lambda x: st.text(x))
+                        with col2:
+                            st.subheader("ANN Model Performance")
+                            ann_metrics_dataframe = classifier_model.apply_model(ann_metrics_dict)
+                            st.dataframe(ann_metrics_dict)
+
                 st.title("Plot Evaluation Metrics")
                 for algo in classification_model_selected:
 
@@ -408,3 +443,4 @@ if file_upload is not None:
                         classifier_model.plot_evaluation_metrics(mlp_ypred, algo)
                     if algo == "K-Neighbors":
                         classifier_model.plot_evaluation_metrics(kn_ypred, algo)
+        
