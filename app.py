@@ -126,7 +126,7 @@ if file_upload is not None:
 
         with st.sidebar.expander("Select Your ML Models"):
 
-            regression_model_selected =st.multiselect("Select Your Regression Models: ", options=regression_multi_model_problem, default=[model for model in regression_multi_model_problem if model != "ANN"])
+            regression_model_selected =st.multiselect("Select Your Regression Models: ", options=regression_multi_model_problem, default=regression_multi_model_problem)
 
         
         with st.sidebar.expander("ML Hyperparameters"):
